@@ -1,0 +1,17 @@
+# Ubuntu 18.04
+dist: xenial
+
+git:
+  depth: 10
+
+language: java
+
+# multiple jdk version
+jdk:
+  - oraclejdk8
+  - oraclejdk9
+  - openjdk8
+
+# codecov
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
