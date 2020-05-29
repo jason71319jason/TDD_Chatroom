@@ -10,6 +10,12 @@ language: java
 jdk:
   - openjdk8
 
+before_script:
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+script:
+  - mvn test -B
+
 # codecov
 after_success:
   - bash <(curl -s https://codecov.io/bash)
