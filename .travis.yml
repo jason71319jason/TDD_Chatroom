@@ -8,7 +8,6 @@ language: java
 
 # multiple jdk version
 jdk:
-  - oepnjdk9
   - openjdk8
 
 # codecov
