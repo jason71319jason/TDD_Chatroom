@@ -1,13 +1,13 @@
 
 public class ClientInfo {
-    private String name;
+    private String username;
 
     /**
      *
-     * @param name client's name
+     * @param username client's name
      */
-    public ClientInfo(String name) {
-        this.name = name;
+    public ClientInfo(String username) {
+        this.username = username;
     }
 
     /**
