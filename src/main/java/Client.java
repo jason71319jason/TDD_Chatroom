@@ -1,10 +1,11 @@
 public class Client {
 
+    private ClientInfo clientInfo;
+    private Status status;
     /**
      *
      */
-    public Client() {
-
+    public Client(ClientInfo clientInfo) {
     }
 
     /**
@@ -13,7 +14,14 @@ public class Client {
      * @param port chatroom server's port
      */
     public void connect(String hostname, int port) {
+    }
 
+    /**
+     *
+     * @return
+     */
+    public Status getStatus() {
+        return null;
     }
 
 }
