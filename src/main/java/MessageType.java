@@ -1,0 +1,3 @@
+public enum MessageType {
+    WHISPER, GLOBAL, SYSTEM_REGISTER, SYSTEM_REVOKE
+}
