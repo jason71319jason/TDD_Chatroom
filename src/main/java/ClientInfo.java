@@ -1,7 +1,7 @@
+import org.json.JSONObject;
 
 public class ClientInfo {
     private String username;
-
     /**
      *
      * @param username client's name
@@ -15,6 +15,7 @@ public class ClientInfo {
      * @return
      */
     public String getName() {
-        return null;
+        return this.username;
     }
+
 }
