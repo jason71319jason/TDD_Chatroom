@@ -22,6 +22,7 @@ public class ClientWriter extends Thread {
     @Override
     public void run() {
         String msg = null;
+//        writer.println(createMessage(msg, MessageType.SYSTEM_REGISTER));
         do {
             try {
                 // prompt
@@ -30,7 +31,7 @@ public class ClientWriter extends Thread {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            writer.println(createMessage(msg));
+            writer.println(createMessage(msg, MessageType.GLOBAL));
         } while(!msg.equals("/exit"));
 
         try {
@@ -40,14 +41,14 @@ public class ClientWriter extends Thread {
         }
     }
 
-    public String createMessage(String msg) {
+    public String createMessage(String msg, MessageType type) {
 
         // TODO: Message parser
         Message message = new Message();
         message.sender = clientInfo.getName();
         message.receivers = new String[]{};
         message.content = msg;
-        message.messageType = MessageType.GLOBAL;
+        message.messageType = type;
         return message.getJsonString();
     }
 }

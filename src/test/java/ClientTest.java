@@ -19,7 +19,7 @@ public class ClientTest {
     }
 
     @Test
-    public void getStatus_correct() throws IOException {
+    public void getClientStatus_correct() throws IOException {
         String username = "Eric";
         ClientInfo clientInfo = new ClientInfo(username);
         Client client = new Client(clientInfo);
@@ -31,7 +31,7 @@ public class ClientTest {
     }
 
     @Test
-    public void duplicate_name_failed() throws  IOException {
+    public void duplicateName_failed() throws  IOException {
         String username = "Eric";
         ClientInfo clientInfo = new ClientInfo(username);
         Client client = new Client(clientInfo);
@@ -46,7 +46,7 @@ public class ClientTest {
     }
 
     @Test
-    public void duplicate_name_failed() throws  IOException {
+    public void clientLeaveStatus_correct() throws  IOException {
         String username = "Eric";
         ClientInfo clientInfo = new ClientInfo(username);
         Client client = new Client(clientInfo);
