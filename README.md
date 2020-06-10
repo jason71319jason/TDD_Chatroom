@@ -53,3 +53,38 @@ Try you best to follow https://google.github.io/styleguide/javaguide.html#s5-nam
     * Client
         1. Open socket and connect with server
         2. A handler handle communication
+        
+* client test
+
+connect_success
+connect_failed
+register_success
+    server_response OK
+register_failed
+    server reject
+    
+send message OK
+send message failed how?
+
+receive message OK
+receive message failed how?
+   
+server crash
+server close
+
+quit
+
+* server test
+
+client connect
+client disconnect
+client register accept
+client register reject
+
+broadcast welcome
+broadcast normal
+broadcast client quit
+
+get client list empty
+get client list add
+get client list quit
