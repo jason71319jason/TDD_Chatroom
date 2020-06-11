@@ -48,43 +48,43 @@ Try you best to follow https://google.github.io/styleguide/javaguide.html#s5-nam
 * ChatRoom
     * Multi-threading Server
         1. Open socket and wait for accepting new client
-        2. When client is accepted, create a new thread (handler) for client.
+        2. When client is accepted, create a new thread (handler) for the client.
         3. When client send message, handler need to broadcast it or deliver to someone.
     * Client
         1. Open socket and connect with server
         2. A handler handle communication
         
-* client test
 
-connect_success
-connect_failed
-register_success
-    server_response OK
-register_failed
-    server reject
+## Requirement
+
+### Client Requirement & Testcase
+* Connect with server
+    * success
+    * failed
+* Register with server
+    * success (server accept)
+    * failed (server reject)
+* Send chat message
+    * workable
+* Receive chat message
+    * workable
+* Disconnect with server
+    * client quit (active)
+    * server close (passive)
     
-send message OK
-send message failed how?
-
-receive message OK
-receive message failed how?
-   
-server crash
-server close
-
-quit
-
-* server test
-
-client connect
-client disconnect
-client register accept
-client register reject
-
-broadcast welcome
-broadcast normal
-broadcast client quit
-
-get client list empty
-get client list add
-get client list quit
+### Server Requirement & Testcase
+* Handle client connection
+    * workable
+* Handle client registration
+    * accept
+    * reject
+* Broadcast welcome message
+    * workable
+* Handle chatting message
+    * workable
+* Broadcast quitting message 
+    * workable  
+* Handle client list
+    * empty
+    * join
+    * quit
