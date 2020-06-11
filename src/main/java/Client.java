@@ -22,10 +22,9 @@ public class Client {
     /**
      *
      */
-//    public Client(ServerInfo serverInfo) throws IOException {
-//        this.hostname = serverInfo.getHostname();
-//        this.port = serverInfo.getPort();
-//    }
+    public Client(ClientInfo info) throws IOException {
+        clientInfo = info;
+    }
 
     /**
      *
@@ -88,7 +87,7 @@ public class Client {
 //        }
 //    }
 
-    public static void main(String argv[]) {
+    public static void main(String argv[]) throws IOException {
         status = Status.INACTIVE;
         clientInfo = new ClientInfo();
         ServerInfo serverInfo = new ServerInfo();
@@ -103,7 +102,7 @@ public class Client {
         };
         logger = Logger.getLogger("Client");
         logger.setLevel(Level.ALL);
-        client = new Client();
+        client = new Client(clientInfo);
         client.connect(serverInfo);
     }
 }
