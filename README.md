@@ -70,7 +70,7 @@ Try you best to follow https://google.github.io/styleguide/javaguide.html#s5-nam
     * workable
 * Disconnect with server
     * client quit (active)
-    * server close (passive)
+    * server crash (passive)
     
 ### Server Requirement & Testcase
 * Handle client connection
@@ -88,3 +88,4 @@ Try you best to follow https://google.github.io/styleguide/javaguide.html#s5-nam
     * empty
     * join
     * quit
+
