@@ -41,7 +41,7 @@ public class ClientReader extends Thread {
     }
 
     private void responseHandler(String response) {
-        System.out.println("\n" + response);
+        Client.logger.info(response);
         JSONObject serverResponse = new JSONObject(response);
         MessageType messageType = MessageType.valueOf(serverResponse.getString("messageType"));
 //        System.out.println('\n' + serverResponse.getString("messageType"));
@@ -49,6 +49,9 @@ public class ClientReader extends Thread {
 //        System.out.println("content: " + content);
         switch(messageType) {
             case WHISPER:
+                if (!clientInfo.getName().isEmpty()) {
+                    System.out.println(content);
+                }
                 break;
             case GLOBAL:
                 // name is empty means has not join chat room yet
@@ -64,11 +67,12 @@ public class ClientReader extends Thread {
 //                    System.out.println(name.getString(0));
                     clientInfo.setName(name.getString(0));
                 } else if (content.equals("REGISTER failed")) {
-                    System.out.println("Register failed, the name had been used by others.");
+                    Client.logger.warning("Register failed, the name had been used by others.");
                 }
                 break;
+
             default:
-                System.out.println("Error: Client receive " + messageType + " type message");
+                Client.logger.warning("Error: Client receive " + messageType + " type message");
                 break;
         }
     }

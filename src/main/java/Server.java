@@ -11,6 +11,7 @@ public class Server {
     public static Logger logger;
     private Status status;
     private ServerSocket serverSocket;
+
     /**
      * Server constructor
      */
@@ -18,7 +19,6 @@ public class Server {
         serverSocket = new ServerSocket(Server.DEFAULT_PORT);
         serverHandlers = new HashSet<>();
         status = Status.INACTIVE;
-
     }
 
     /**
@@ -42,6 +42,7 @@ public class Server {
             while (true) {
 
                 Socket clientSocket = serverSocket.accept();
+
                 logger.info("New client was accepted");
                 logger.info(String.format("IP: %s, Port: %d %n",
                         clientSocket.getInetAddress().toString(), clientSocket.getPort()));

@@ -1,3 +1,3 @@
 public enum MessageType {
-    WHISPER, GLOBAL, REGISTER, SERVER
+    WHISPER, GLOBAL, REGISTER, QUIT, SERVER
 }
