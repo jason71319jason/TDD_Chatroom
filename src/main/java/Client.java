@@ -99,12 +99,6 @@ public class Client extends Thread {
         serverInfo.setHostname("localhost");
         serverInfo.setPort(12345);
         Client client;
-        Callback callback = new Callback() {
-            @Override
-            public void callback(String response) {
-                System.out.println(response);
-            }
-        };
         logger = Logger.getLogger("Client");
         logger.setLevel(Level.ALL);
         client = new Client(clientInfo);
@@ -112,7 +106,4 @@ public class Client extends Thread {
     }
 }
 
-interface Callback {
-    public void callback(String response);
-}
 
