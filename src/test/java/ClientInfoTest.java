@@ -5,9 +5,10 @@ import static org.junit.Assert.*;
 
 public class ClientInfoTest {
 
-    @Test (expected = NullPointerException.class)
+    @Test
     public void ClientInfo_null() {
         ClientInfo clientInfo = new ClientInfo();
+        clientInfo.setName(null);
         Assert.assertNull(clientInfo.getName());
     }
 
