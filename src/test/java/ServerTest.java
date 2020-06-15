@@ -139,7 +139,8 @@ public class ServerTest {
         client_2.connect(serverInfo);
 
         client_1.disconnect();
-        /* How to test? */
+        /* Use Mockito to Test
+        * */
     }
 
     // Handle client list
