@@ -23,6 +23,7 @@ public class Client extends Thread {
      *
      */
     public Client(ClientInfo info) throws IOException {
+        status = Status.INACTIVE;
         clientInfo = info;
     }
 
