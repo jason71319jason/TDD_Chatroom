@@ -49,10 +49,6 @@ public class ClientReader extends Thread {
 //        System.out.println("content: " + content);
         switch(messageType) {
             case WHISPER:
-                if (!clientInfo.getName().isEmpty()) {
-                    System.out.println(content);
-                }
-                break;
             case GLOBAL:
                 // name is empty means has not join chat room yet
                 if (!clientInfo.getName().isEmpty()) {
