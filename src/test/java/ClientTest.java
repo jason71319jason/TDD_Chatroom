@@ -19,10 +19,11 @@ public class ClientTest {
     public void connect_success() throws IOException {
         String username = "Eric";
         ClientInfo clientInfo = new ClientInfo();
+        clientInfo.setName(username);
         Client client = new Client(clientInfo);
 
         client.connect(serverInfo);
-        Assert.assertEquals(client.getStatus(), Status.ACTIVE);
+        Assert.assertEquals(Status.ACTIVE, client.getStatus());
     }
 
     @Test
@@ -31,10 +32,10 @@ public class ClientTest {
         ClientInfo clientInfo = new ClientInfo();
         Client client = new Client(clientInfo);
 
-        Assert.assertEquals(client.getStatus(), Status.INACTIVE);
+        Assert.assertEquals(Status.INACTIVE, client.getStatus());
 
         client.connect(serverInfo);
-        Assert.assertEquals(client.getStatus(), Status.ACTIVE);
+        Assert.assertEquals(Status.ACTIVE, client.getStatus());
     }
 
     @Test
@@ -49,7 +50,7 @@ public class ClientTest {
         Client client_2 = new Client(clientInfo_2);
 
         client_2.connect(serverInfo);
-        Assert.assertEquals(client.getStatus(), Status.INACTIVE);
+        Assert.assertEquals(Status.INACTIVE, client.getStatus());
     }
 
     @Test
@@ -59,10 +60,10 @@ public class ClientTest {
         Client client = new Client(clientInfo);
 
         client.connect(serverInfo);
-        Assert.assertEquals(client.getStatus(), Status.ACTIVE);
+        Assert.assertEquals(Status.ACTIVE, client.getStatus());
 
         client.disconnect();
-        Assert.assertEquals(client.getStatus(), Status.INACTIVE);
+        Assert.assertEquals(Status.INACTIVE, client.getStatus());
     }
 
     @Test
