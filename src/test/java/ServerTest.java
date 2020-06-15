@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -82,31 +84,79 @@ public class ServerTest {
     // Server handle client connect
     @Test
     public void handleClientConnect() throws IOException {
-
+        Server server = new Server();
+        server.run();
+        client = new Client(clientInfo);
+        client.connect(serverInfo);
+        Assert.assertEquals(1, server.getClientNum());
     }
 
     // accept client register
     @Test
     public void acceptClientRegister() throws IOException {
-
+        Server server = new Server();
+        server.run();
+        client = new Client(clientInfo);
+        clientInfo.setName("c");
+        client.connect(serverInfo);
+        /* How to assert? This is not enough. */
+        Assert.assertEquals(1, server.getClientNum());
     }
 
     // reject client register
     @Test
     public void rejectClientRegister() throws IOException {
+        Server server = new Server();
+        server.run();
 
+        ClientInfo clientInfo_1 = new ClientInfo();
+        Client client_1 = new Client(clientInfo_1);
+        clientInfo_1.setName("a");
+        client_1.connect(serverInfo);
+
+        ClientInfo clientInfo_2 = new ClientInfo();
+        Client client_2 = new Client(clientInfo_2);
+        clientInfo_2.setName("a");
+        client_2.connect(serverInfo);
+
+        Assert.assertEquals(1, server.getClientNum());
     }
 
-    // Broadcast work success
+    // Broadcast server message success
     @Test
     public void broadcast_success() throws IOException {
+        Server server = new Server();
+        server.run();
 
+        ClientInfo clientInfo_1 = new ClientInfo();
+        Client client_1 = new Client(clientInfo_1);
+        clientInfo_1.setName("a");
+        client_1.connect(serverInfo);
+
+        ClientInfo clientInfo_2 = new ClientInfo();
+        Client client_2 = new Client(clientInfo_2);
+        clientInfo_2.setName("b");
+        client_2.connect(serverInfo);
+
+        client_1.disconnect();
+        /* How to test? */
     }
 
     // Handle client list
     @Test
     public void handleClientList() throws IOException {
-
+        Server server = new Server();
+        server.run();
+        Set<Client> clientSet = new HashSet<>();
+        int MaxClientNumber = 20;
+        for (int i = 1; i <= MaxClientNumber; i++) {
+            ClientInfo clientInfo_loop = new ClientInfo();
+            clientInfo_loop.setName(String.valueOf(i));
+            Client client = new Client(clientInfo);
+            client.connect(serverInfo);
+            clientSet.add(client);
+            Assert.assertEquals(i, server.getClientNum());
+        }
     }
 
     @Test

@@ -84,6 +84,10 @@ public class Server extends Thread {
         return serverSocket.getLocalPort();
     }
 
+    public int getClientNum() {
+        return serverHandlers.size();
+    }
+
     public static void main(String argv[]) {
         try {
             Server server = new Server(12345);
