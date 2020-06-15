@@ -1,3 +1,4 @@
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,22 +9,35 @@ import java.io.IOException;
 import static org.junit.Assert.*;
 
 public class ClientTest {
-    ServerInfo serverInfo = new ServerInfo();
+    private ServerInfo serverInfo;
+    private Server server;
+
     @Before
-    public void setServerInfo(){
+    public void setServerInfo() throws IOException {
+        serverInfo = new ServerInfo();
         serverInfo.setHostname("localhost");
         serverInfo.setPort(12345);
+        server = new Server();
+        Thread serverThread = new Thread(server);
+        serverThread.start();
+
+    }
+
+    @After
+    public void shutdownServer() {
+        /* if server exist, then shutdown it */
+        // server.shutdown();
     }
 
     @Test
     public void connect_success() throws IOException {
         String username = "Eric";
         ClientInfo clientInfo = new ClientInfo();
-        clientInfo.setName(username);
         Client client = new Client(clientInfo);
-
+//        Thread clientThread = new Thread(client);
+//        clientThread.run();
         client.connect(serverInfo);
-        Assert.assertEquals(Status.ACTIVE, client.getStatus());
+        Assert.assertEquals(client.getStatus(), Status.ACTIVE);
     }
 
     @Test
@@ -32,10 +46,10 @@ public class ClientTest {
         ClientInfo clientInfo = new ClientInfo();
         Client client = new Client(clientInfo);
 
-        Assert.assertEquals(Status.INACTIVE, client.getStatus());
+        Assert.assertEquals(client.getStatus(), Status.INACTIVE);
 
         client.connect(serverInfo);
-        Assert.assertEquals(Status.ACTIVE, client.getStatus());
+        Assert.assertEquals(client.getStatus(), Status.ACTIVE);
     }
 
     @Test
@@ -50,7 +64,7 @@ public class ClientTest {
         Client client_2 = new Client(clientInfo_2);
 
         client_2.connect(serverInfo);
-        Assert.assertEquals(Status.INACTIVE, client.getStatus());
+        Assert.assertEquals(client.getStatus(), Status.INACTIVE);
     }
 
     @Test
@@ -60,10 +74,10 @@ public class ClientTest {
         Client client = new Client(clientInfo);
 
         client.connect(serverInfo);
-        Assert.assertEquals(Status.ACTIVE, client.getStatus());
+        Assert.assertEquals(client.getStatus(), Status.ACTIVE);
 
         client.disconnect();
-        Assert.assertEquals(Status.INACTIVE, client.getStatus());
+        Assert.assertEquals(client.getStatus(), Status.INACTIVE);
     }
 
     @Test

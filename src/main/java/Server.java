@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 
-public class Server {
+public class Server extends Thread {
 
     public static final int DEFAULT_PORT = 12345;
     public static Set<ServerHandler> serverHandlers;
@@ -16,6 +16,8 @@ public class Server {
      * Server constructor
      */
     public Server() throws IOException {
+        logger = Logger.getLogger("Chat Room Server");
+        logger.setLevel(Level.ALL);
         serverSocket = new ServerSocket(Server.DEFAULT_PORT);
         serverHandlers = new HashSet<>();
         status = Status.INACTIVE;
@@ -26,6 +28,8 @@ public class Server {
      * @param port binding port
      */
     public Server(int port) throws IOException {
+        logger = Logger.getLogger("Chat Room Server");
+        logger.setLevel(Level.ALL);
         serverSocket = new ServerSocket(port);
         serverHandlers = new HashSet<>();
         status = Status.INACTIVE;
@@ -36,6 +40,7 @@ public class Server {
      * Run server
      */
     public void run() {
+
         try {
             logger.info("Wait for new client");
 
@@ -81,9 +86,6 @@ public class Server {
 
     public static void main(String argv[]) {
         try {
-            logger = Logger.getLogger("Chat Room Server");
-            logger.setLevel(Level.ALL);
-
             Server server = new Server(12345);
             server.run();
         } catch (IOException e) {

@@ -10,14 +10,14 @@ public class ServerTest {
     @Test
     public void server_defaultPort() throws IOException {
         Server server = new Server();
-        Assert.assertEquals(Server.DEFAULT_PORT, server.getPort());
+        Assert.assertEquals(server.getPort(), Server.DEFAULT_PORT);
     }
 
     @Test
     public void server_givenNonOccupiedPort() throws IOException {
         int givenPort = 54321;
         Server server = new Server(givenPort);
-        Assert.assertEquals(givenPort, server.getPort());
+        Assert.assertEquals(server.getPort(), givenPort);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -38,20 +38,20 @@ public class ServerTest {
     public void run_defaultPort() throws IOException {
         Server server = new Server();
         server.run();
-        Assert.assertEquals(Status.ACTIVE, server.getStatus());
+        Assert.assertEquals(server.getStatus(), Status.ACTIVE);
     }
 
     @Test
     public void run_givenPort() throws IOException {
         Server server = new Server();
         server.run();
-        Assert.assertEquals(Status.ACTIVE, server.getStatus());
+        Assert.assertEquals(server.getStatus(), Status.ACTIVE);
     }
 
     @Test
     public void shutdown_success() throws IOException {
         Server server = new Server();
         server.shutdown();
-        Assert.assertEquals(Status.INACTIVE, server.getStatus());
+        Assert.assertEquals(server.getStatus(), Status.INACTIVE);
     }
 }

@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Client {
+public class Client extends Thread {
 
     public static Logger logger;
 
@@ -56,6 +56,10 @@ public class Client {
 
     public Status getStatus() {
         return status;
+    }
+
+    public void run(ServerInfo serverInfo) {
+        this.connect(serverInfo);
     }
 
 
