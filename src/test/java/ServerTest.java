@@ -2,22 +2,38 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ServerTest {
-    private ServerInfo serverInfo;
+
+    @InjectMocks
     private Server server;
+
+    @Mock
+    private ServerSocket mockServerSocket;
+    @Mock
+    private Socket mockClientSocket;
+
+    private ServerInfo serverInfo;
     private ClientInfo clientInfo;
     private Client client;
     String username = "Eric";
 
     @Before
     public void setServerInfo() throws IOException {
+        /*
         clientInfo = new ClientInfo();
         clientInfo.setName(username);
 
@@ -28,20 +44,25 @@ public class ServerTest {
         server = new Server();
         Thread serverThread = new Thread(server);
         serverThread.start();
-
+        */
+        MockitoAnnotations.initMocks(this);
     }
 
     @After
     public void shutdownServer() {
         /* check if server exist, then shutdown it */
-         server.shutdown();
+        server.shutdown();
+        mockServerSocket = null;
+        mockClientSocket = null;
     }
 
     // Server start success
     @Test
     public void server_defaultPort() throws IOException {
-        Server server = new Server();
-        Assert.assertEquals(Server.DEFAULT_PORT, server.getPort());
+
+        when(mockServerSocket);
+        this.server = new Server();
+        Assert.assertEquals(Server.DEFAULT_PORT, this.server.getPort());
     }
 
     @Test
@@ -75,15 +96,16 @@ public class ServerTest {
 
     @Test
     public void run_givenPort() throws IOException {
+        when(mockServerSocket.accept()).thenReturn(mockClientSocket);
         Server server = new Server();
         server.run();
         Assert.assertEquals(server.getStatus(), Status.ACTIVE);
     }
 
-
     // Server handle client connect
     @Test
     public void handleClientConnect() throws IOException {
+
         Server server = new Server();
         server.run();
         client = new Client(clientInfo);

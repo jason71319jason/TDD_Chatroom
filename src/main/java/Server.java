@@ -6,7 +6,7 @@ import java.util.logging.*;
 
 public class Server extends Thread {
 
-    public static final int DEFAULT_PORT = 12345;
+    public static final int DEFAULT_PORT = 54321;
     public static Set<ServerHandler> serverHandlers;
     public static Logger logger;
     private Status status;
@@ -15,8 +15,11 @@ public class Server extends Thread {
     /**
      * Server constructor
      */
-    public Server() throws IOException {
+    public Server(ServerSocket socket, Set handlerSet, Logger logger) throws IOException {
 
+        this.logger = logger;
+        this.serverSocket = socket;
+        this.serverHandlers = handlerSet;
         this.initLogger();
 
         serverSocket = new ServerSocket(Server.DEFAULT_PORT);
@@ -47,8 +50,8 @@ public class Server extends Thread {
 
         try {
             Server.logger.info("Wait for new client");
-            this.setStatus(Status.INACTIVE);
-            while (this.status == Status.INACTIVE) {
+            this.setStatus(Status.ACTIVE);
+            while (this.status == Status.ACTIVE) {
 
                 Socket clientSocket = serverSocket.accept();
 
@@ -60,6 +63,7 @@ public class Server extends Thread {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            this.shutdown();
         }
     }
 
@@ -133,4 +137,5 @@ public class Server extends Thread {
             e.printStackTrace();
         }
     }
+
 }

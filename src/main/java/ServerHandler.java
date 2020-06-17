@@ -43,6 +43,7 @@ public class ServerHandler extends Thread {
         }
     }
 
+    // TODO: rename
     public void ClientHandler(String Msg) {
         Server.logger.info(Msg);
         JSONObject clientMsg = new JSONObject(Msg);
