@@ -16,45 +16,47 @@ public class Server extends Thread {
      * Server constructor
      */
     public Server() throws IOException {
-        logger = Logger.getLogger("Chat Room Server");
-        logger.setLevel(Level.ALL);
+
+        this.initLogger();
+
         serverSocket = new ServerSocket(Server.DEFAULT_PORT);
         serverHandlers = new HashSet<>();
-        status = Status.INACTIVE;
+
+        this.setStatus(Status.INACTIVE);
     }
 
     /**
      * Server constructor
-     * @param port binding port
+     * @param port given binding port
      */
     public Server(int port) throws IOException {
-        logger = Logger.getLogger("Chat Room Server");
-        logger.setLevel(Level.ALL);
+
+        this.initLogger();
+
         serverSocket = new ServerSocket(port);
         serverHandlers = new HashSet<>();
-        status = Status.INACTIVE;
-    }
 
+        this.setStatus(Status.INACTIVE);
+    }
 
     /**
      * Run server
+     * Accept new client and create new thread to handle client
      */
     public void run() {
 
         try {
-            logger.info("Wait for new client");
-
-            while (true) {
+            Server.logger.info("Wait for new client");
+            this.setStatus(Status.INACTIVE);
+            while (this.status == Status.INACTIVE) {
 
                 Socket clientSocket = serverSocket.accept();
 
-                logger.info("New client was accepted");
-                logger.info(String.format("IP: %s, Port: %d %n",
+                Server.logger.info("New client was accepted");
+                Server.logger.info(String.format("IP: %s, Port: %d %n",
                         clientSocket.getInetAddress().toString(), clientSocket.getPort()));
 
-                ServerHandler newClientHandler = new ServerHandler(clientSocket, this);
-                serverHandlers.add(newClientHandler);
-                newClientHandler.start();
+                this.runServerHandler(clientSocket);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -65,7 +67,12 @@ public class Server extends Thread {
      * Shutdown server
      */
     public void shutdown() {
-        
+        try {
+            this.serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        this.setStatus(Status.INACTIVE);
     }
 
     /**
@@ -84,8 +91,38 @@ public class Server extends Thread {
         return serverSocket.getLocalPort();
     }
 
+    /**
+     * Get number of server handlers (client)
+     * @return number of server handlers
+     */
     public int getClientNum() {
         return serverHandlers.size();
+    }
+
+    /**
+     * Set status of server
+     * @param status status of server
+     */
+    private void setStatus(Status status) {
+        this.status = status;
+    }
+
+    /**
+     * initialize server logger
+     */
+    private void initLogger() {
+        logger = Logger.getLogger("Chat Room Server");
+        logger.setLevel(Level.ALL);
+    }
+
+    /**
+     * Start thread of server handler
+     * @param socket socket of client
+     */
+    private void runServerHandler(Socket socket) {
+        ServerHandler newClientHandler = new ServerHandler(socket, this);
+        this.serverHandlers.add(newClientHandler);
+        newClientHandler.start();
     }
 
     public static void main(String argv[]) {
