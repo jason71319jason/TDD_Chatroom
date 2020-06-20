@@ -1,3 +1,4 @@
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Message {
@@ -15,4 +16,31 @@ public class Message {
         return object.toString();
     }
 
+    public void setMessage(String sender, String[] receivers,
+                           MessageType type, String content) {
+        this.sender = sender;
+        this.receivers = receivers;
+        this.messageType = type;
+        this.content = content;
+    }
+
+    public void setMessageByJson(JSONObject jsonObject) {
+        // sender
+        this.sender = jsonObject.getString("sender");
+        // receivers
+        JSONArray jsonArray = jsonObject.getJSONArray("receivers");
+        receivers = new String[jsonArray.length()];
+        for (int i=0; i<jsonArray.length(); i++) {
+            receivers[i] = jsonArray.getString(i);
+        }
+        // messageType
+        this.messageType = MessageType.valueOf(jsonObject.getString("messageType"));
+        // content
+        this.content = jsonObject.getString("content");
+    }
+
+    public String getContent() { return this.content; }
+    public String[] getReceivers() { return this.receivers; }
+    public MessageType getMessageType() { return this.messageType; }
+    public String getSender() { return  this.sender; }
 }
