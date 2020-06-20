@@ -7,14 +7,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ServerTest {
 
@@ -25,26 +24,13 @@ public class ServerTest {
     private ServerSocket mockServerSocket;
     @Mock
     private Socket mockClientSocket;
-
-    private ServerInfo serverInfo;
-    private ClientInfo clientInfo;
-    private Client client;
-    String username = "Eric";
+    @Mock
+    private ServerHandlerFactory mockServerHandlerFactory;
+    @Mock
+    private ServerHandler mockServerHandler;
 
     @Before
-    public void setServerInfo() throws IOException {
-        /*
-        clientInfo = new ClientInfo();
-        clientInfo.setName(username);
-
-        serverInfo = new ServerInfo();
-        serverInfo.setHostname("localhost");
-        serverInfo.setPort(12345);
-
-        server = new Server();
-        Thread serverThread = new Thread(server);
-        serverThread.start();
-        */
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
@@ -56,136 +42,46 @@ public class ServerTest {
         mockClientSocket = null;
     }
 
-    // Server start success
     @Test
-    public void server_defaultPort() throws IOException {
+    public void getPort_defaultPort() {
 
-        when(mockServerSocket);
-        this.server = new Server();
+        when(mockServerSocket.getLocalPort()).thenReturn(Server.DEFAULT_PORT);
+        this.server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
         Assert.assertEquals(Server.DEFAULT_PORT, this.server.getPort());
     }
 
     @Test
-    public void server_givenNonOccupiedPort() throws IOException {
-        int givenPort = 54321;
-        Server server = new Server(givenPort);
-        Assert.assertEquals(givenPort, server.getPort());
-    }
+    public void run_acceptConnection() throws IOException {
+        when(mockServerSocket.accept())
+                .thenReturn(mockClientSocket)
+                .thenReturn(mockClientSocket)
+                .thenReturn(mockClientSocket)
+                .thenReturn(null);
+        when(mockClientSocket.getInetAddress())
+                .thenReturn(InetAddress.getByAddress(
+                        new byte[]{(byte) 192, (byte) 168, (byte) 132, (byte)1}))
+                .thenReturn(InetAddress.getByAddress(
+                        new byte[]{(byte) 192, (byte) 168, (byte) 132, (byte)2}))
+                .thenReturn(InetAddress.getByAddress(
+                        new byte[]{(byte) 192, (byte) 168, (byte) 132, (byte)3}));
+        when(mockClientSocket.getPort())
+                .thenReturn(12345)
+                .thenReturn(23456)
+                .thenReturn(34567);
+        when(mockServerHandlerFactory.createServerHandler(mockClientSocket))
+                .thenReturn(mockServerHandler);
 
-    // Server start failed
-    @Test (expected = IllegalArgumentException.class)
-    public void server_givenInvalidPort() throws IOException {
-        int invalidPort = -1;
-        Server server = new Server(invalidPort);
+        server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
+        server.start();
+
+        verify(mockServerHandlerFactory, times(3)).createServerHandler(any());
+        Assert.assertEquals(3, Server.serverHandlers.size());
     }
 
     @Test (expected = IOException.class)
-    public void run_OccupiedPort() throws IOException {
-        Server server = new Server();
-        server.run();
-        Server error_server = new Server();
-        error_server.run();
-    }
-
-    @Test
-    public void run_defaultPort() throws IOException {
-        Server server = new Server();
-        server.run();
-        Assert.assertEquals(server.getStatus(), Status.ACTIVE);
-    }
-
-    @Test
-    public void run_givenPort() throws IOException {
-        when(mockServerSocket.accept()).thenReturn(mockClientSocket);
-        Server server = new Server();
-        server.run();
-        Assert.assertEquals(server.getStatus(), Status.ACTIVE);
-    }
-
-    // Server handle client connect
-    @Test
-    public void handleClientConnect() throws IOException {
-
-        Server server = new Server();
-        server.run();
-        client = new Client(clientInfo);
-        client.connect(serverInfo);
-        Assert.assertEquals(1, server.getClientNum());
-    }
-
-    // accept client register
-    @Test
-    public void acceptClientRegister() throws IOException {
-        Server server = new Server();
-        server.run();
-        client = new Client(clientInfo);
-        clientInfo.setName("c");
-        client.connect(serverInfo);
-        /* How to assert? This is not enough. */
-        Assert.assertEquals(1, server.getClientNum());
-    }
-
-    // reject client register
-    @Test
-    public void rejectClientRegister() throws IOException {
-        Server server = new Server();
-        server.run();
-
-        ClientInfo clientInfo_1 = new ClientInfo();
-        Client client_1 = new Client(clientInfo_1);
-        clientInfo_1.setName("a");
-        client_1.connect(serverInfo);
-
-        ClientInfo clientInfo_2 = new ClientInfo();
-        Client client_2 = new Client(clientInfo_2);
-        clientInfo_2.setName("a");
-        client_2.connect(serverInfo);
-
-        Assert.assertEquals(1, server.getClientNum());
-    }
-
-    // Broadcast server message success
-    @Test
-    public void broadcast_success() throws IOException {
-        Server server = new Server();
-        server.run();
-
-        ClientInfo clientInfo_1 = new ClientInfo();
-        Client client_1 = new Client(clientInfo_1);
-        clientInfo_1.setName("a");
-        client_1.connect(serverInfo);
-
-        ClientInfo clientInfo_2 = new ClientInfo();
-        Client client_2 = new Client(clientInfo_2);
-        clientInfo_2.setName("b");
-        client_2.connect(serverInfo);
-
-        client_1.disconnect();
-        /* Use Mockito to Test
-        * */
-    }
-
-    // Handle client list
-    @Test
-    public void handleClientList() throws IOException {
-        Server server = new Server();
-        server.run();
-        Set<Client> clientSet = new HashSet<>();
-        int MaxClientNumber = 20;
-        for (int i = 1; i <= MaxClientNumber; i++) {
-            ClientInfo clientInfo_loop = new ClientInfo();
-            clientInfo_loop.setName(String.valueOf(i));
-            Client client = new Client(clientInfo);
-            client.connect(serverInfo);
-            clientSet.add(client);
-            Assert.assertEquals(i, server.getClientNum());
-        }
-    }
-
-    @Test
-    public void shutdown_success() throws IOException {
-        Server server = new Server();
-        server.shutdown();
-        Assert.assertEquals(server.getStatus(), Status.INACTIVE);
+    public void run_acceptError() throws IOException {
+        when(mockServerSocket.accept()).thenThrow(IOException.class);
+        Server server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
+        server.start();
     }
 }
