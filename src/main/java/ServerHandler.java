@@ -16,9 +16,8 @@ public class ServerHandler extends Thread {
     private Server server;
     private String clientName;
 
-    public ServerHandler(Socket socket, Server server) {
+    public ServerHandler(Socket socket) {
         this.socket = socket;
-        this.server = server;
     }
 
     @Override

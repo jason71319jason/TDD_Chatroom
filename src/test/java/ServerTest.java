@@ -51,7 +51,7 @@ public class ServerTest {
     }
 
     @Test
-    public void run_acceptConnection() throws IOException {
+    public void start_acceptConnection() throws IOException {
         when(mockServerSocket.accept())
                 .thenReturn(mockClientSocket)
                 .thenReturn(mockClientSocket)
@@ -79,7 +79,7 @@ public class ServerTest {
     }
 
     @Test (expected = IOException.class)
-    public void run_acceptError() throws IOException {
+    public void start_acceptError() throws IOException {
         when(mockServerSocket.accept()).thenThrow(IOException.class);
         Server server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
         server.start();

@@ -1,43 +1,32 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.*;
 
-public class Server extends Thread {
+public class Server {
 
     public static final int DEFAULT_PORT = 54321;
-    public static Set<ServerHandler> serverHandlers;
+    public static List<ServerHandler> serverHandlers;
     public static Logger logger;
+
     private Status status;
     private ServerSocket serverSocket;
+    private ServerHandlerFactory serverHandlerFactory;
 
     /**
      * Server constructor
      */
-    public Server(ServerSocket socket, Set handlerSet, Logger logger) throws IOException {
-
-        this.logger = logger;
+    public Server(ServerSocket socket, List handlerList,
+                  ServerHandlerFactory serverHandlerFactory) {
         this.serverSocket = socket;
-        this.serverHandlers = handlerSet;
+        this.serverHandlers = handlerList;
+        this.serverHandlerFactory = serverHandlerFactory;
+
+        this.logger = Logger.getLogger("Chat room server");
         this.initLogger();
-
-        serverSocket = new ServerSocket(Server.DEFAULT_PORT);
-        serverHandlers = new HashSet<>();
-
-        this.setStatus(Status.INACTIVE);
-    }
-
-    /**
-     * Server constructor
-     * @param port given binding port
-     */
-    public Server(int port) throws IOException {
-
-        this.initLogger();
-
-        serverSocket = new ServerSocket(port);
-        serverHandlers = new HashSet<>();
 
         this.setStatus(Status.INACTIVE);
     }
@@ -46,24 +35,17 @@ public class Server extends Thread {
      * Run server
      * Accept new client and create new thread to handle client
      */
-    public void run() {
+    public void start() throws IOException{
 
-        try {
-            Server.logger.info("Wait for new client");
-            this.setStatus(Status.ACTIVE);
-            while (this.status == Status.ACTIVE) {
+        Server.logger.info("Wait for new client");
+        this.setStatus(Status.ACTIVE);
+        Socket clientSocket;
+        while((clientSocket = serverSocket.accept()) != null) {
+            Server.logger.info("New client was accepted");
+            Server.logger.info(String.format("IP: %s, Port: %d %n",
+                    clientSocket.getInetAddress().toString(), clientSocket.getPort()));
 
-                Socket clientSocket = serverSocket.accept();
-
-                Server.logger.info("New client was accepted");
-                Server.logger.info(String.format("IP: %s, Port: %d %n",
-                        clientSocket.getInetAddress().toString(), clientSocket.getPort()));
-
-                this.runServerHandler(clientSocket);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.shutdown();
+            this.runServerHandler(clientSocket);
         }
     }
 
@@ -96,14 +78,6 @@ public class Server extends Thread {
     }
 
     /**
-     * Get number of server handlers (client)
-     * @return number of server handlers
-     */
-    public int getClientNum() {
-        return serverHandlers.size();
-    }
-
-    /**
      * Set status of server
      * @param status status of server
      */
@@ -121,18 +95,20 @@ public class Server extends Thread {
 
     /**
      * Start thread of server handler
-     * @param socket socket of client
      */
     private void runServerHandler(Socket socket) {
-        ServerHandler newClientHandler = new ServerHandler(socket, this);
-        this.serverHandlers.add(newClientHandler);
-        newClientHandler.start();
+        ServerHandler handler = serverHandlerFactory.createServerHandler(socket);
+        this.serverHandlers.add(handler);
+        handler.start();
     }
 
     public static void main(String argv[]) {
         try {
-            Server server = new Server(12345);
-            server.run();
+            ServerSocket serverSocket = new ServerSocket(Server.DEFAULT_PORT);
+            List handleList= new ArrayList();
+            ServerHandlerFactory serverHandlerFactory = new ServerHandlerFactory();
+            Server server = new Server(serverSocket, handleList, serverHandlerFactory);
+            server.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
