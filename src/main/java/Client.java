@@ -97,7 +97,7 @@ public class Client extends Thread {
         clientInfo = new ClientInfo();
         ServerInfo serverInfo = new ServerInfo();
         serverInfo.setHostname("localhost");
-        serverInfo.setPort(12345);
+        serverInfo.setPort(Server.DEFAULT_PORT);
         Client client;
         logger = Logger.getLogger("Client");
         logger.setLevel(Level.ALL);

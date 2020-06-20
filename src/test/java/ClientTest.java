@@ -24,9 +24,6 @@ public class ClientTest {
         serverInfo.setHostname("localhost");
         serverInfo.setPort(12345);
 
-        server = new Server();
-        Thread serverThread = new Thread(server);
-        serverThread.start();
 
     }
 
