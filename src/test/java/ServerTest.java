@@ -11,7 +11,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import static org.mockito.Mockito.*;
 
@@ -30,12 +29,12 @@ public class ServerTest {
     private ServerHandler mockServerHandler;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception  {
         MockitoAnnotations.initMocks(this);
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() throws Exception {
         /* check if server exist, then shutdown it */
         server = null;
         mockServerSocket = null;
@@ -68,15 +67,15 @@ public class ServerTest {
                 .thenReturn(12345)
                 .thenReturn(23456)
                 .thenReturn(34567);
-        when(mockServerHandlerFactory.createServerHandler(mockClientSocket))
+        when(mockServerHandlerFactory.createServerHandler(any(), any()))
                 .thenReturn(mockServerHandler);
         doNothing().when(mockServerHandler).run();
 
         server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
         server.start();
 
-        verify(mockServerHandlerFactory, times(3)).createServerHandler(any());
-        Assert.assertEquals(3, Server.serverHandlers.size());
+        verify(mockServerHandlerFactory, times(3)).createServerHandler(any(), any());
+        Assert.assertEquals(3, this.server.getServerHandles().size());
     }
 
     @Test (expected = IOException.class)
@@ -91,7 +90,7 @@ public class ServerTest {
         server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
         server.shutdown();
         Assert.assertEquals(Status.INACTIVE, server.getStatus());
-        Assert.assertEquals(0, Server.serverHandlers.size());
+        Assert.assertEquals(0, this.server.getServerHandles().size());
     }
 
     @Test (expected = IOException.class)

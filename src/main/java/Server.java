@@ -9,9 +9,9 @@ import java.util.logging.*;
 public class Server {
 
     public static final int DEFAULT_PORT = 54321;
-    public static List<ServerHandler> serverHandlers;
-    public static Logger logger;
 
+    private Logger logger;
+    private List<ServerHandler> serverHandlers;
     private Status status;
     private ServerSocket serverSocket;
     private ServerHandlerFactory serverHandlerFactory;
@@ -37,12 +37,12 @@ public class Server {
      */
     public void start() throws IOException{
 
-        Server.logger.info("Wait for new client");
+        this.logger.info("Wait for new client");
         this.setStatus(Status.ACTIVE);
         Socket clientSocket;
         while((clientSocket = serverSocket.accept()) != null) {
-            Server.logger.info("New client was accepted");
-            Server.logger.info(String.format("IP: %s, Port: %d %n",
+            this.logger.info("New client was accepted");
+            this.logger.info(String.format("IP: %s, Port: %d %n",
                     clientSocket.getInetAddress().toString(), clientSocket.getPort()));
 
             this.runServerHandler(clientSocket);
@@ -54,7 +54,7 @@ public class Server {
      */
     public void shutdown() throws IOException {
         this.serverSocket.close();
-        Server.serverHandlers.clear();
+        this.serverHandlers.clear();
         this.setStatus(Status.INACTIVE);
     }
 
@@ -74,6 +74,17 @@ public class Server {
         return serverSocket.getLocalPort();
     }
 
+    public List getServerHandles() {
+        return this.serverHandlers;
+    }
+
+    public void setServerHandlers(List serverHandlers) {
+        this.serverHandlers = serverHandlers;
+    }
+
+    public Logger getLogger() {
+        return this.logger;
+    }
     /**
      * Set status of server
      * @param status status of server
@@ -93,8 +104,8 @@ public class Server {
     /**
      * Start thread of server handler
      */
-    private void runServerHandler(Socket socket) {
-        ServerHandler handler = serverHandlerFactory.createServerHandler(socket);
+    private void runServerHandler(Socket socket) throws IOException {
+        ServerHandler handler = serverHandlerFactory.createServerHandler(socket, this);
         this.serverHandlers.add(handler);
         handler.start();
     }
