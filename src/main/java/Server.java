@@ -52,12 +52,9 @@ public class Server {
     /**
      * Shutdown server
      */
-    public void shutdown() {
-        try {
-            this.serverSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void shutdown() throws IOException {
+        this.serverSocket.close();
+        Server.serverHandlers.clear();
         this.setStatus(Status.INACTIVE);
     }
 

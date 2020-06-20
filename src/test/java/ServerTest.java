@@ -35,9 +35,9 @@ public class ServerTest {
     }
 
     @After
-    public void shutdownServer() {
+    public void tearDown() throws IOException {
         /* check if server exist, then shutdown it */
-        server.shutdown();
+        server = null;
         mockServerSocket = null;
         mockClientSocket = null;
     }
@@ -70,6 +70,7 @@ public class ServerTest {
                 .thenReturn(34567);
         when(mockServerHandlerFactory.createServerHandler(mockClientSocket))
                 .thenReturn(mockServerHandler);
+        doNothing().when(mockServerHandler).run();
 
         server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
         server.start();
@@ -81,7 +82,34 @@ public class ServerTest {
     @Test (expected = IOException.class)
     public void start_acceptError() throws IOException {
         when(mockServerSocket.accept()).thenThrow(IOException.class);
-        Server server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
+        server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
         server.start();
+    }
+
+    @Test
+    public void shutdown_success() throws IOException {
+        server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
+        server.shutdown();
+        Assert.assertEquals(Status.INACTIVE, server.getStatus());
+        Assert.assertEquals(0, Server.serverHandlers.size());
+    }
+
+    @Test (expected = IOException.class)
+    public void shutdown_closeSocketError() throws IOException {
+        doThrow(new IOException()).when(mockServerSocket).close();
+        server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
+        server.shutdown();
+    }
+
+    @Test
+    public void getStatus() throws IOException {
+        when(mockServerSocket.accept()).thenReturn(null);
+
+        server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
+        Assert.assertEquals(Status.INACTIVE, server.getStatus());
+        server.start();
+        Assert.assertEquals(Status.ACTIVE, server.getStatus());
+        server.shutdown();
+        Assert.assertEquals(Status.INACTIVE, server.getStatus());
     }
 }
