@@ -10,78 +10,94 @@ import java.util.List;
 
 public class ServerHandler extends Thread {
 
+    public static final String SERVER = "SERVER";
     private Socket socket;
     private BufferedReader reader;
     private PrintWriter writer;
     private Server server;
     private String clientName;
 
-    public ServerHandler(Socket socket) {
+    public ServerHandler(Socket socket, Server server,
+                         BufferedReader reader,
+                         PrintWriter writer) {
         this.socket = socket;
+        this.server = server;
+        this.reader = reader;
+        this.writer = writer;
     }
 
     @Override
-    public void run() {
-        try {
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            writer = new PrintWriter(socket.getOutputStream(), true);
-            // register
+    public void run()  {
+        String clientMsg;
 
-
-            String clientMsg;
-            do {
+        do {
+            try {
                 clientMsg = reader.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+                break;
+            }
 
-                ClientHandler(clientMsg);
-
-                System.out.println(clientMsg);
-//               this.broadcast(clientMsg);
-            } while(!clientMsg.equals("/exit"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            handleMessage(clientMsg);
+            System.out.println(clientMsg);
+            //this.broadcast(clientMsg);
+        } while(!clientMsg.equals("/exit"));
     }
 
-    // TODO: rename
-    public void ClientHandler(String Msg) {
-        Server.logger.info(Msg);
-        JSONObject clientMsg = new JSONObject(Msg);
+    public void handleMessage(String msg) {
+
+        this.server.getLogger().info(msg);
+
+        Message receivedMessage = new Message();
+        Message sentMessage = new Message();
+        receivedMessage.setMessageByJson(new JSONObject(msg));
+
+        JSONObject clientMsg = new JSONObject(msg);
         MessageType messageType = MessageType.valueOf(clientMsg.getString("messageType"));
-        JSONArray jsonArray = clientMsg.getJSONArray("receivers");
+
         List<String> receivers = new ArrayList<String>();
 
+        JSONArray jsonArray = clientMsg.getJSONArray("receivers");
         for (int i=0; i<jsonArray.length(); i++) {
             receivers.add(jsonArray.getString(i));
         }
 
         String content = clientMsg.getString("content");
+        String sender = clientMsg.getString("sender");
         String Response;
         switch(messageType) {
             case WHISPER:
                 String whisperMsg = clientName + " whispers: " + content;
-                Response = createWhisperMessage(whisperMsg, MessageType.WHISPER);
-                this.sendWhisperMessage(receivers.get(0), Response);
+                Response = createMessage(whisperMsg, MessageType.WHISPER);
+                sentMessage.setMessage(this.clientName,
+                        receivedMessage.receivers,
+                        MessageType.WHISPER,
+                        Response);
+                this.whisperMessage(receivedMessage.getReceivers()[0], sentMessage.getJsonString());
                 break;
             case GLOBAL:
                 String broadcastMsg = clientName + " says: " + content;
-                Response = createMessage(broadcastMsg, MessageType.GLOBAL);
-                this.broadcast(Response);
+                sentMessage.setMessage(this.clientName,
+                        receivedMessage.receivers,
+                        MessageType.GLOBAL,
+                        Response);
+                this.broadcastMessage(sentMessage.getJsonString());
                 break;
             case QUIT:
-                Server.serverHandlers.remove(this);
+                this.server.getServerHandles().remove(this);
                 String byeMsg =  clientName + " leave the chat room";
                 Response = createMessage(byeMsg, MessageType.GLOBAL);
-                this.broadcast(Response);
-                for(ServerHandler h: Server.serverHandlers) {
-                    System.out.println(h.getClientName());
+                this.broadcastMessage(Response);
+                for(Object obj: this.server.getServerHandles()) {
+                    ServerHandler handler = (ServerHandler) obj;
+                    System.out.println(handler.getClientName());
                 }
                 break;
-
             case REGISTER:
                 String name = content;
                 // check name is valid
                 boolean isPass = false;
-                if (checkName(name)) {
+                if (checkUserName(name)) {
                     clientName = name;
                     isPass = true;
                     Response = createMessage("REGISTER OK", MessageType.SERVER);
@@ -91,19 +107,20 @@ public class ServerHandler extends Thread {
                 sendMessage(Response);
                 if(isPass) {
                     Response = createMessage(name + " joins the chat room", MessageType.GLOBAL);
-                    this.broadcast(Response);
+                    this.broadcastMessage(Response);
                 }
                 break;
 
             default:
-                Server.logger.warning("Server receive " + messageType + " type message");
+                this.server.getLogger().warning("Server receive " + messageType + " type message");
                 break;
         }
 
     }
 
-    private boolean checkName(String name) {
-        for(ServerHandler handler : Server.serverHandlers) {
+    private boolean checkUserName(String name) {
+        for(Object obj : this.server.getServerHandles()) {
+            ServerHandler handler = (ServerHandler) obj;
             if (name.equals(handler.getClientName())) {
                 return false;
             }
@@ -115,40 +132,30 @@ public class ServerHandler extends Thread {
         this.writer.println(msg);
     }
 
-    public void broadcast(String msg) {
-        for(ServerHandler handler : Server.serverHandlers) {
+    public void broadcastMessage(String msg) {
+        for(Object obj : this.server.getServerHandles()) {
+            ServerHandler handler = (ServerHandler) obj;
             if (this != handler) {
                 handler.sendMessage(msg);
             }
         }
     }
 
-    public void sendWhisperMessage(String username, String msg) {
-        for(ServerHandler handler : Server.serverHandlers) {
+    public void whisperMessage(String username, String msg) {
+        for(Object obj : this.server.getServerHandles()) {
+            ServerHandler handler = (ServerHandler) obj;
             if (handler.getClientName().equals(username)) {
                 handler.sendMessage(msg);
                 break;
             }
         }
-
     }
+
     public String createMessage(String msg, MessageType type) {
 
-        // TODO: Message parser
         Message message = new Message();
-        message.sender = "SERVER";
-        message.receivers = new String[]{clientName};
-        message.content = msg;
-        message.messageType = type;
-        return message.getJsonString();
-    }
-
-    public String createWhisperMessage(String msg, MessageType type) {
-
-        // TODO: Message parser
-        Message message = new Message();
-        message.sender = "SERVER";
-        message.receivers = new String[]{clientName};
+        message.sender = SERVER;
+        message.receivers = new String[]{this.clientName};
         message.content = msg;
         message.messageType = type;
         return message.getJsonString();
@@ -156,5 +163,9 @@ public class ServerHandler extends Thread {
 
     public String getClientName() {
         return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
     }
 }
