@@ -1,5 +1,6 @@
 import org.json.*;
 
+import javax.print.attribute.standard.RequestingUserName;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -67,8 +68,7 @@ public class ServerHandler extends Thread {
         String Response;
         switch(messageType) {
             case WHISPER:
-                String whisperMsg = clientName + " whispers: " + content;
-                Response = createMessage(whisperMsg, MessageType.WHISPER);
+                Response = this.clientName + " whispers: " + content;
                 sentMessage.setMessage(this.clientName,
                         receivedMessage.receivers,
                         MessageType.WHISPER,
@@ -76,7 +76,7 @@ public class ServerHandler extends Thread {
                 this.whisperMessage(receivedMessage.getReceivers()[0], sentMessage.getJsonString());
                 break;
             case GLOBAL:
-                String broadcastMsg = clientName + " says: " + content;
+                Response = this.clientName + " says: " + content;
                 sentMessage.setMessage(this.clientName,
                         receivedMessage.receivers,
                         MessageType.GLOBAL,
@@ -85,29 +85,38 @@ public class ServerHandler extends Thread {
                 break;
             case QUIT:
                 this.server.getServerHandles().remove(this);
-                String byeMsg =  clientName + " leave the chat room";
-                Response = createMessage(byeMsg, MessageType.GLOBAL);
-                this.broadcastMessage(Response);
-                for(Object obj: this.server.getServerHandles()) {
-                    ServerHandler handler = (ServerHandler) obj;
-                    System.out.println(handler.getClientName());
-                }
+                Response =  this.clientName + " leave the chat room";
+                sentMessage.setMessage(this.clientName,
+                        receivedMessage.receivers,
+                        MessageType.GLOBAL,
+                        Response);
+                this.broadcastMessage(sentMessage.getJsonString());
                 break;
             case REGISTER:
-                String name = content;
+                String name = receivedMessage.content;
                 // check name is valid
                 boolean isPass = false;
                 if (checkUserName(name)) {
-                    clientName = name;
+                    this.clientName = name;
                     isPass = true;
-                    Response = createMessage("REGISTER OK", MessageType.SERVER);
+                    Response = "REGISTER_OK";
                 } else {
-                    Response = createMessage("REGISTER failed", MessageType.SERVER);
+                    Response = "REGISTER_FAILED";
                 }
-                sendMessage(Response);
+
+                sentMessage.setMessage(ServerHandler.SERVER,
+                        receivedMessage.receivers,
+                        MessageType.SERVER,
+                        Response);
+                this.sendMessage(sentMessage.getJsonString());
+                // broadcast to other
                 if(isPass) {
-                    Response = createMessage(name + " joins the chat room", MessageType.GLOBAL);
-                    this.broadcastMessage(Response);
+                    Response = this.clientName + " joins the chat room";
+                    sentMessage.setMessage(ServerHandler.SERVER,
+                            receivedMessage.receivers,
+                            MessageType.GLOBAL,
+                            Response);
+                    this.broadcastMessage(sentMessage.getJsonString());
                 }
                 break;
 

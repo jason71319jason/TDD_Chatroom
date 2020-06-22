@@ -135,11 +135,11 @@ public class ServerHandlerTest {
         Message message = new Message();
 
         // Whisper
-        message.setMessage("C", new String[]{"C"},
+        message.setMessage("C", new String[]{"A"},
                 MessageType.WHISPER, "whispers");
 
         senderC.handleMessage(message.getJsonString());
-        String expected = "{\"messageType\":\"WHISPER\",\"sender\":\"SERVER\",\"receivers\":[\"C\"],\"content\":\"C whispers: whispers\"}";
+        String expected = "{\"messageType\":\"WHISPER\",\"sender\":\"C\",\"receivers\":[\"A\"],\"content\":\"C whispers: whispers\"}";
         verify(mockPrintWriter, times(1))
                 .println(expected);
     }
@@ -160,11 +160,11 @@ public class ServerHandlerTest {
         Message message = new Message();
 
         // Broadcast
-        message.setMessage("A", new String[]{"C"},
+        message.setMessage("C", new String[]{},
                 MessageType.GLOBAL, "broadcasts");
 
         senderC.handleMessage(message.getJsonString());
-        String expected = "{\"messageType\":\"GLOBAL\",\"sender\":\"SERVER\",\"receivers\":[\"C\"],\"content\":\"C says: broadcasts\"}";
+        String expected = "{\"messageType\":\"GLOBAL\",\"sender\":\"C\",\"receivers\":[],\"content\":\"C says: broadcasts\"}";
         verify(mockPrintWriter, times(1))
                 .println(expected);
     }
@@ -185,17 +185,17 @@ public class ServerHandlerTest {
         Message message = new Message();
 
         // Quit
-        message.setMessage("SERVER", new String[]{"A"},
-                MessageType.QUIT, "A quits");
+        message.setMessage("C", new String[]{},
+                MessageType.QUIT, "");
 
         senderC.handleMessage(message.getJsonString());
-        String expected = "{\"messageType\":\"GLOBAL\",\"sender\":\"SERVER\",\"receivers\":[\"C\"],\"content\":\"C leave the chat room\"}";
+        String expected = "{\"messageType\":\"GLOBAL\",\"sender\":\"C\",\"receivers\":[],\"content\":\"C leave the chat room\"}";
         verify(mockPrintWriter, times(1))
                 .println(expected);
     }
 
     @Test
-    public void handleMessage_register() {
+    public void handleMessage_registerOnce() {
 
         List serverHandlers = new ArrayList();
         when(mockServer.getServerHandles())
@@ -205,18 +205,66 @@ public class ServerHandlerTest {
         doNothing().when(mockLogger).info(anyString());
 
         serverHandlers.add(receiverA);
-        serverHandlers.add(senderC);
 
         Message message = new Message();
 
         // Register
-        message.setMessage("SERVER", new String[]{"C"},
-                MessageType.REGISTER, "A registers");
+        message.setMessage("SERVER", new String[]{},
+                MessageType.REGISTER, "C");
 
         senderC.handleMessage(message.getJsonString());
-        String expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[\"A registers\"],\"content\":\"REGISTER OK\"}";
+        String expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"REGISTER_OK\"}";
+        verify(mockPrintWriter, times(1))
+                .println(expected);
+        expected = "{\"messageType\":\"GLOBAL\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"C joins the chat room\"}";
         verify(mockPrintWriter, times(1))
                 .println(expected);
     }
 
+    @Test
+    public void handleMessage_registerTriple() {
+
+        List serverHandlers = new ArrayList();
+        when(mockServer.getServerHandles())
+                .thenReturn(serverHandlers);
+
+        when(mockServer.getLogger()).thenReturn(mockLogger);
+        doNothing().when(mockLogger).info(anyString());
+
+        serverHandlers.add(receiverA);
+        serverHandlers.add(receiverB);
+
+        Message message = new Message();
+
+        // Register first time: fail
+        message.setMessage("SERVER", new String[]{},
+                MessageType.REGISTER, "A");
+
+        senderC.handleMessage(message.getJsonString());
+        String expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"REGISTER_FAILED\"}";
+        verify(mockPrintWriter, times(1))
+                .println(expected);
+
+        // Register second time: fail
+        message.setMessage("SERVER", new String[]{},
+                MessageType.REGISTER, "B");
+
+        senderC.handleMessage(message.getJsonString());
+        expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"REGISTER_FAILED\"}";
+        verify(mockPrintWriter, times(2))
+                .println(expected);
+
+        // Register third time: success
+        message.setMessage("SERVER", new String[]{},
+                MessageType.REGISTER, "C");
+
+        senderC.handleMessage(message.getJsonString());
+
+        expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"REGISTER_OK\"}";
+        verify(mockPrintWriter, times(1))
+                .println(expected);
+        expected = "{\"messageType\":\"GLOBAL\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"C joins the chat room\"}";
+        verify(mockPrintWriter, times(2))
+                .println(expected);
+    }
 }
