@@ -37,6 +37,9 @@ public class Client extends Thread {
         this.status = status;
     }
 
+    public void start() {
+
+    }
     /**
      *
      */

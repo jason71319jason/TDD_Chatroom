@@ -10,14 +10,10 @@ import java.util.logging.Handler;
 public class ClientReader extends Thread {
 
     private BufferedReader reader;
-    private Socket socket;
-    private ClientInfo clientInfo;
     private Client client;
 
     public ClientReader(Client client,
                         BufferedReader reader) {
-        this.socket = client.getSocket();
-        this.clientInfo = client.getClientInfo();
         this.client = client;
         this.reader = reader;
     }
@@ -48,14 +44,14 @@ public class ClientReader extends Thread {
             case WHISPER:
             case GLOBAL:
                 // name is empty means has not join chat room yet
-                if (!this.clientInfo.getName().isEmpty()) {
+                if (!this.client.getClientInfo().getName().isEmpty()) {
                     System.out.println(receivedMessage.content);
                 }
                 break;
             case SERVER:
                 if (receivedMessage.content.equals("REGISTER_OK")) {
                     // set client username
-                    this.clientInfo.setName(receivedMessage.
+                    this.client.getClientInfo().setName(receivedMessage.
                             getReceivers()[0]);
                 } else if (receivedMessage.content.equals("REGISTER_FAILED")) {
                     System.err.println("Register failed, the name had been used by others.");

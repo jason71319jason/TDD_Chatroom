@@ -1,5 +1,6 @@
 import java.io.*;
-import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -7,38 +8,31 @@ public class ClientWriter extends Thread {
 
     private PrintWriter writer;
     private BufferedReader reader;
-    private Socket socket;
-    private ClientInfo clientInfo;
     private Client client;
 
-    public ClientWriter(Socket socket, ClientInfo clientInfo, Client client) {
-        this.socket = socket;
-        this.clientInfo = clientInfo;
-//        this.client = client;
-        try {
-            writer = new PrintWriter(socket.getOutputStream(), true);
-            reader = new BufferedReader(new InputStreamReader(System.in));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public ClientWriter(Client client, PrintWriter printWriter) {
+        this.client = client;
+        this.writer = printWriter;
+        reader = new BufferedReader(new InputStreamReader(System.in));
     }
 
     @Override
     public void run() {
         String msg = null;
         // Register
-        while(clientInfo.getName().isEmpty()) {
+        while(this.client.getClientInfo().getName().isEmpty()) {
             try {
-                Register();
+                register();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
         // Communication
         do {
             try {
                 // prompt
-                System.out.print("[" + clientInfo.getName() + "]: ");
+                System.out.print("[" + this.client.getClientInfo().getName() + "]: ");
                 msg = reader.readLine();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -49,92 +43,56 @@ public class ClientWriter extends Thread {
         // check successfully quit
         writer.println(createByeMessage());
         try {
-            socket.close();
+            this.client.getSocket().close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void Register() throws InterruptedException {
+    public void register() throws InterruptedException {
         System.out.print("Type your name: ");
+        String name;
+        String msg;
         try {
-            String name = reader.readLine();
+            name = reader.readLine();
             if (name == null || name == "") {
                 System.out.println("name can not be empty");
                 return;
             }
-            String Msg = createRegisterMessage(name);
-            System.out.println(Msg);
-            writer.println(Msg);
+            msg = createRegisterMessage(name);
+            this.client.getLogger().info(msg);
+            writer.println(msg);
         } catch (IOException e) {
             e.printStackTrace();
         }
         System.out.println("Registering...");
+
+        // Dummy waiting
         sleep(1000);
     }
 
     public String createRegisterMessage(String msg) {
         Message message = new Message();
-        message.sender = clientInfo.getName();
-        message.receivers = new String[]{};
-        message.content = msg;
-        message.messageType = MessageType.REGISTER;
+        message.setMessage(this.client.getClientInfo().getName(),
+                new String[]{},
+                MessageType.REGISTER,
+                msg);
         return message.getJsonString();
     }
 
     public String createByeMessage() {
         Message message = new Message();
-        message.sender = clientInfo.getName();
-        message.receivers = new String[]{};
-        message.content = "";
-        message.messageType = MessageType.QUIT;
+        message.setMessage(this.client.getClientInfo().getName(),
+                new String[]{},
+                MessageType.QUIT,
+                "");
         return message.getJsonString();
     }
 
     public String createMessage(String msg) {
-
-        // TODO: Message parser
-
         Message message = new Message();
-        message.sender = clientInfo.getName();
-        String receivers[] = new String[1];
-        if(getReceiver(msg) != null)
-            receivers[0] = getReceiver(msg);
-        message.receivers = receivers;
-        message.content = getMsgString(msg);
-        message.messageType = checkMessageType(msg);
+        message.setMessageByPlainText(msg);
+        message.sender = this.client.getClientInfo().getName();
         return message.getJsonString();
     }
-
-    public String getReceiver(String msg) {
-        String pattern = "/w\\s(.+)\\s+(.*)";
-        Matcher matcher = Pattern.compile(pattern).matcher(msg);
-        if(matcher.find()) {
-            return matcher.group(1);
-        } else {
-            return "EVERYONE";
-        }
-    }
-
-    public MessageType checkMessageType(String msg) {
-        //
-        String pattern = "/w\\s(.+)\\s+(.*)";
-        Matcher matcher = Pattern.compile(pattern).matcher(msg);
-        if(matcher.find()) {
-            return MessageType.WHISPER;
-        } else {
-            return MessageType.GLOBAL;
-        }
-    }
-
-    public String getMsgString(String msg) {
-        String pattern = "/w\\s(.+)\\s+(.*)";
-        Matcher matcher = Pattern.compile(pattern).matcher(msg);
-        if(matcher.find()) {
-            return matcher.group(2);
-        } else {
-            return msg;
-        }
-    }
-
 }
