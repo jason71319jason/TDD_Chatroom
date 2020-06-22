@@ -1,10 +1,9 @@
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Server {
 
@@ -19,7 +18,7 @@ public class Server {
     /**
      * Server constructor
      */
-    public Server(ServerSocket socket, List handlerList,
+    public Server(ServerSocket socket, List<ServerHandler> handlerList,
                   ServerHandlerFactory serverHandlerFactory) {
         this.serverSocket = socket;
         this.serverHandlers = handlerList;
@@ -35,7 +34,7 @@ public class Server {
      * Run server
      * Accept new client and create new thread to handle client
      */
-    public void start() throws IOException{
+    public void start() throws IOException {
 
         this.logger.info("Wait for new client");
         this.setStatus(Status.ACTIVE);
@@ -74,12 +73,8 @@ public class Server {
         return serverSocket.getLocalPort();
     }
 
-    public List getServerHandles() {
+    public List<ServerHandler> getServerHandles() {
         return this.serverHandlers;
-    }
-
-    public void setServerHandlers(List serverHandlers) {
-        this.serverHandlers = serverHandlers;
     }
 
     public Logger getLogger() {
@@ -110,10 +105,10 @@ public class Server {
         handler.start();
     }
 
-    public static void main(String argv[]) {
+    public static void main(String[] args) {
         try {
             ServerSocket serverSocket = new ServerSocket(Server.DEFAULT_PORT);
-            List handleList= new ArrayList();
+            List<ServerHandler> handleList= new ArrayList<>();
             ServerHandlerFactory serverHandlerFactory = new ServerHandlerFactory();
             Server server = new Server(serverSocket, handleList, serverHandlerFactory);
             server.start();

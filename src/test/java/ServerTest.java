@@ -29,24 +29,28 @@ public class ServerTest {
     private ServerHandler mockServerHandler;
 
     @Before
-    public void setUp() throws Exception  {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
     @After
-    public void tearDown() throws Exception {
-        /* check if server exist, then shutdown it */
+    public void tearDown() {
+
         server = null;
         mockServerSocket = null;
         mockClientSocket = null;
+        mockServerHandlerFactory = null;
+        mockServerHandler = null;
     }
 
     @Test
     public void getPort_defaultPort() {
 
         when(mockServerSocket.getLocalPort()).thenReturn(Server.DEFAULT_PORT);
-        this.server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
-        Assert.assertEquals(Server.DEFAULT_PORT, this.server.getPort());
+        server = new Server(mockServerSocket,
+                new ArrayList<>(),
+                mockServerHandlerFactory);
+        Assert.assertEquals(Server.DEFAULT_PORT, server.getPort());
     }
 
     @Test
@@ -69,34 +73,42 @@ public class ServerTest {
                 .thenReturn(34567);
         when(mockServerHandlerFactory.createServerHandler(any(), any()))
                 .thenReturn(mockServerHandler);
-        doNothing().when(mockServerHandler).run();
+        doNothing().when(mockServerHandler).start();
 
-        server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
+        server = new Server(mockServerSocket,
+                new ArrayList<>(),
+                mockServerHandlerFactory);
         server.start();
-
-        verify(mockServerHandlerFactory, times(3)).createServerHandler(any(), any());
-        Assert.assertEquals(3, this.server.getServerHandles().size());
+        verify(mockServerHandlerFactory, times(3))
+                .createServerHandler(any(), any());
+        Assert.assertEquals(3, server.getServerHandles().size());
     }
 
     @Test (expected = IOException.class)
     public void start_acceptError() throws IOException {
-        when(mockServerSocket.accept()).thenThrow(IOException.class);
-        server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
+        when(mockServerSocket.accept()).thenThrow(new IOException());
+        server = new Server(mockServerSocket,
+                new ArrayList<>(),
+                mockServerHandlerFactory);
         server.start();
     }
 
     @Test
     public void shutdown_success() throws IOException {
-        server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
+        server = new Server(mockServerSocket,
+                new ArrayList<>(),
+                mockServerHandlerFactory);
         server.shutdown();
         Assert.assertEquals(Status.INACTIVE, server.getStatus());
-        Assert.assertEquals(0, this.server.getServerHandles().size());
+        Assert.assertEquals(0, server.getServerHandles().size());
     }
 
     @Test (expected = IOException.class)
     public void shutdown_closeSocketError() throws IOException {
         doThrow(new IOException()).when(mockServerSocket).close();
-        server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
+        server = new Server(mockServerSocket,
+                new ArrayList<>(),
+                mockServerHandlerFactory);
         server.shutdown();
     }
 
@@ -104,7 +116,9 @@ public class ServerTest {
     public void getStatus() throws IOException {
         when(mockServerSocket.accept()).thenReturn(null);
 
-        server = new Server(mockServerSocket, new ArrayList(), mockServerHandlerFactory);
+        server = new Server(mockServerSocket,
+                new ArrayList<>(),
+                mockServerHandlerFactory);
         Assert.assertEquals(Status.INACTIVE, server.getStatus());
         server.start();
         Assert.assertEquals(Status.ACTIVE, server.getStatus());

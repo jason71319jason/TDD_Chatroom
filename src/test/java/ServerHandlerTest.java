@@ -1,8 +1,6 @@
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -12,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class ServerHandlerTest {
@@ -34,7 +30,7 @@ public class ServerHandlerTest {
     private ServerHandler senderC;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         receiverA = new ServerHandler(mockSocket, mockServer,
                 mockBufferedReader, mockPrintWriter);
@@ -50,7 +46,7 @@ public class ServerHandlerTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         mockSocket = null;
         mockBufferedReader = null;
         mockPrintWriter = null;
@@ -61,7 +57,7 @@ public class ServerHandlerTest {
 
     @Test
     public void broadcastMessage_success() {
-        List serverHandlers = new ArrayList();
+        List<ServerHandler> serverHandlers = new ArrayList<>();
 
         when(mockServer.getServerHandles())
                 .thenReturn(serverHandlers);
@@ -77,7 +73,7 @@ public class ServerHandlerTest {
 
     @Test
     public void whisperMessage_success() {
-        List serverHandlers = new ArrayList();
+        List<ServerHandler> serverHandlers = new ArrayList<>();
         when(mockServer.getServerHandles())
                 .thenReturn(serverHandlers);
 
@@ -94,35 +90,8 @@ public class ServerHandlerTest {
     }
 
     @Test
-    public void createMessage_success() {
-        ServerHandler handler = new ServerHandler(mockSocket, mockServer,
-                mockBufferedReader, mockPrintWriter);
-
-        handler.setClientName("A");
-        String result = handler.createMessage("To be whispered", MessageType.WHISPER);
-        String expected = "{\"messageType\":\"WHISPER\",\"sender\":\"SERVER\",\"receivers\":[\"A\"],\"content\":\"To be whispered\"}";
-        Assert.assertEquals(expected, result);
-
-        handler.setClientName("B");
-        result = handler.createMessage("To be registered", MessageType.REGISTER);
-        expected = "{\"messageType\":\"REGISTER\",\"sender\":\"SERVER\",\"receivers\":[\"B\"],\"content\":\"To be registered\"}";
-        Assert.assertEquals(expected, result);
-
-        handler.setClientName("C");
-        result = handler.createMessage("To be broadcast", MessageType.GLOBAL);
-        expected = "{\"messageType\":\"GLOBAL\",\"sender\":\"SERVER\",\"receivers\":[\"C\"],\"content\":\"To be broadcast\"}";
-        Assert.assertEquals(expected, result);
-
-        handler.setClientName("D");
-        result = handler.createMessage("To be quited", MessageType.QUIT);
-        expected = "{\"messageType\":\"QUIT\",\"sender\":\"SERVER\",\"receivers\":[\"D\"],\"content\":\"To be quited\"}";
-        Assert.assertEquals(expected, result);
-    }
-
-    @Test
     public void handleMessage_whisper() {
-
-        List serverHandlers = new ArrayList();
+        List<ServerHandler> serverHandlers = new ArrayList<>();
         when(mockServer.getServerHandles())
                 .thenReturn(serverHandlers);
 
@@ -146,8 +115,7 @@ public class ServerHandlerTest {
 
     @Test
     public void handleMessage_broadcast() {
-
-        List serverHandlers = new ArrayList();
+        List<ServerHandler> serverHandlers = new ArrayList<>();
         when(mockServer.getServerHandles())
                 .thenReturn(serverHandlers);
 
@@ -171,8 +139,7 @@ public class ServerHandlerTest {
 
     @Test
     public void handleMessage_quit() {
-
-        List serverHandlers = new ArrayList();
+        List<ServerHandler> serverHandlers = new ArrayList<>();
         when(mockServer.getServerHandles())
                 .thenReturn(serverHandlers);
 
@@ -196,8 +163,7 @@ public class ServerHandlerTest {
 
     @Test
     public void handleMessage_registerOnce() {
-
-        List serverHandlers = new ArrayList();
+        List<ServerHandler> serverHandlers = new ArrayList<>();
         when(mockServer.getServerHandles())
                 .thenReturn(serverHandlers);
 
@@ -223,8 +189,7 @@ public class ServerHandlerTest {
 
     @Test
     public void handleMessage_registerTriple() {
-
-        List serverHandlers = new ArrayList();
+        List<ServerHandler> serverHandlers = new ArrayList<>();
         when(mockServer.getServerHandles())
                 .thenReturn(serverHandlers);
 
@@ -246,7 +211,7 @@ public class ServerHandlerTest {
                 .println(expected);
 
         // Register second time: fail
-        message.setMessage("SERVER", new String[]{},
+        message.setMessage("SERVER_NAME", new String[]{},
                 MessageType.REGISTER, "B");
 
         senderC.handleMessage(message.getJsonString());
@@ -255,7 +220,7 @@ public class ServerHandlerTest {
                 .println(expected);
 
         // Register third time: success
-        message.setMessage("SERVER", new String[]{},
+        message.setMessage("SERVER_NAME", new String[]{},
                 MessageType.REGISTER, "C");
 
         senderC.handleMessage(message.getJsonString());
