@@ -14,61 +14,57 @@ public class ClientReader extends Thread {
     private ClientInfo clientInfo;
     private Client client;
 
-    public ClientReader(Socket socket, ClientInfo clientInfo, Client client) {
-        this.socket = socket;
-        this.clientInfo = clientInfo;
-//        this.client = client;
-        try {
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public ClientReader(Client client,
+                        BufferedReader reader) {
+        this.socket = client.getSocket();
+        this.clientInfo = client.getClientInfo();
+        this.client = client;
+        this.reader = reader;
     }
 
     @Override
     public void run() {
-        while(true) {
+        String response;
+        do {
             try {
-                String response = reader.readLine();
-//                System.out.println("Reader: " + clientInfo.getName());
-                responseHandler(response);
+                response = reader.readLine();
+                this.responseHandler(response);
 
             } catch (IOException e) {
                 e.printStackTrace();
                 break;
             }
-        }
+        } while(response != null);
     }
 
-    private void responseHandler(String response) {
-        Client.logger.info(response);
-        JSONObject serverResponse = new JSONObject(response);
-        MessageType messageType = MessageType.valueOf(serverResponse.getString("messageType"));
-//        System.out.println('\n' + serverResponse.getString("messageType"));
-        String content = serverResponse.getString("content");
-//        System.out.println("content: " + content);
-        switch(messageType) {
+    public void responseHandler(String msg) {
+        this.client.getLogger().info(msg);
+
+        Message receivedMessage = new Message();
+        Message sentMessage = new Message();
+        receivedMessage.setMessageByJson(new JSONObject(msg));
+
+        switch(receivedMessage.getMessageType()) {
             case WHISPER:
             case GLOBAL:
                 // name is empty means has not join chat room yet
-                if (!clientInfo.getName().isEmpty()) {
-                    System.out.println(content);
+                if (!this.clientInfo.getName().isEmpty()) {
+                    System.out.println(receivedMessage.content);
                 }
                 break;
             case SERVER:
-                if (content.equals("REGISTER OK")) {
-//                    System.out.println("OK");
+                if (receivedMessage.content.equals("REGISTER_OK")) {
                     // set client username
-                    JSONArray name = serverResponse.getJSONArray("receivers");
-//                    System.out.println(name.getString(0));
-                    clientInfo.setName(name.getString(0));
-                } else if (content.equals("REGISTER failed")) {
-                    Client.logger.warning("Register failed, the name had been used by others.");
+                    this.clientInfo.setName(receivedMessage.
+                            getReceivers()[0]);
+                } else if (receivedMessage.content.equals("REGISTER_FAILED")) {
+                    System.err.println("Register failed, the name had been used by others.");
                 }
                 break;
 
             default:
-                Client.logger.warning("Error: Client receive " + messageType + " type message");
+                this.client.getLogger().warning("Error: Client receive " +
+                        receivedMessage.getMessageType() + " type message");
                 break;
         }
     }
