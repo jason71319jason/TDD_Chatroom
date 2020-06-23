@@ -1,8 +1,4 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ClientWriter extends Thread {
 
@@ -18,66 +14,25 @@ public class ClientWriter extends Thread {
 
     @Override
     public void run() {
-        String msg = null;
-        // Register
-        while(this.client.getClientInfo().getName().isEmpty()) {
-            try {
-                register();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
+        String msg = "";
         // Communication
-        do {
+        while(this.client.getStatus() == Status.ACTIVE &&
+                !msg.equals("/exit")) {
             try {
                 // prompt
                 System.out.print("[" + this.client.getClientInfo().getName() + "]: ");
                 msg = reader.readLine();
+                writer.println(createMessage(msg));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            writer.println(createMessage(msg));
-        } while(!msg.equals("/exit"));
+        }
 
         // check successfully quit
-        writer.println(createByeMessage());
-        try {
-            this.client.getSocket().close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+        if(this.client.getStatus() == Status.ACTIVE)
+            writer.println(createByeMessage());
 
-    public void register() throws InterruptedException {
-        System.out.print("Type your name: ");
-        String name;
-        String msg;
-        try {
-            name = reader.readLine();
-            if (name == null || name == "") {
-                System.out.println("name can not be empty");
-                return;
-            }
-            msg = createRegisterMessage(name);
-            this.client.getLogger().info(msg);
-            writer.println(msg);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Registering...");
-
-        // Dummy waiting
-        sleep(1000);
-    }
-
-    public String createRegisterMessage(String msg) {
-        Message message = new Message();
-        message.setMessage(this.client.getClientInfo().getName(),
-                new String[]{},
-                MessageType.REGISTER,
-                msg);
-        return message.getJsonString();
+        this.client.disconnect();
     }
 
     public String createByeMessage() {

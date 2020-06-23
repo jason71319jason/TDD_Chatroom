@@ -17,4 +17,13 @@ public class ClientHandlerFactory {
                                 client.getSocket()
                                         .getInputStream())));
     }
+
+    public ClientRegister createClientRegister(Client client) throws IOException {
+       return new ClientRegister(client,
+               new PrintWriter(
+                       client.getSocket().getOutputStream(), true),
+               new BufferedReader(
+                       new InputStreamReader(
+                               client.getSocket().getInputStream())));
+    }
 }

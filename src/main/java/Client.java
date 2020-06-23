@@ -33,18 +33,17 @@ public class Client extends Thread {
         this.setStatus(Status.INACTIVE);
     }
 
-    private void setStatus(Status status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
-    public void start() {
-
-    }
     /**
      *
      */
     public void connect() throws IOException {
         this.status = Status.ACTIVE;
+        ClientRegister register = clientHandlerFactory.createClientRegister(this);
+        register.register();
         this.clientHandlerFactory.createClientWriter(this).start();
         this.clientHandlerFactory.createClientReader(this).start();
     }

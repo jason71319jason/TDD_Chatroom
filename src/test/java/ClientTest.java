@@ -29,6 +29,8 @@ public class ClientTest {
     private ClientReader mockClientReader;
     @Mock
     private ClientWriter mockClientWriter;
+    @Mock
+    private ClientRegister mockClientRegister;
 
     @Before
     public void setUp() {
@@ -42,6 +44,7 @@ public class ClientTest {
         mockClientHandlerFactory = null;
         mockClientReader = null;
         mockClientWriter = null;
+        mockClientRegister = null;
     }
 
     // Connect success
@@ -51,9 +54,12 @@ public class ClientTest {
                 .thenReturn(mockClientReader);
         when(mockClientHandlerFactory.createClientWriter(any()))
                 .thenReturn(mockClientWriter);
+        when(mockClientHandlerFactory.createClientRegister(any()))
+                .thenReturn(mockClientRegister);
 
         client = new Client(mockSocket, mockClientInfo,
                 mockClientHandlerFactory);
+
         client.connect();
         Assert.assertEquals(Status.ACTIVE, client.getStatus());
     }
@@ -65,9 +71,12 @@ public class ClientTest {
                 .thenReturn(mockClientReader);
         when(mockClientHandlerFactory.createClientWriter(any()))
                 .thenReturn(mockClientWriter);
+        when(mockClientHandlerFactory.createClientRegister(any()))
+                .thenReturn(mockClientRegister);
 
         client = new Client(mockSocket, mockClientInfo,
                 mockClientHandlerFactory);
+
         client.connect();
         Assert.assertEquals(Status.ACTIVE, client.getStatus());
         client.disconnect();

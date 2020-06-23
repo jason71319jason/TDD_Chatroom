@@ -25,8 +25,6 @@ public class ClientWriterTest {
     @Mock
     private PrintWriter mockPrintWriter;
     @Mock
-    private Logger mockLogger;
-    @Mock
     private ClientInfo mockClientInfo;
 
     @Before
@@ -39,28 +37,7 @@ public class ClientWriterTest {
         clientWriter = null;
         mockClient = null;
         mockPrintWriter = null;
-        mockLogger = null;
         mockClientInfo = null;
-    }
-
-    @Test
-    public void register_inputSuccess() throws InterruptedException {
-        when(mockClient.getClientInfo()).thenReturn(mockClientInfo);
-        when(mockClientInfo.getName()).thenReturn("");
-        when(mockClient.getLogger()).thenReturn(mockLogger);
-        doNothing().when(mockPrintWriter).println(anyString());
-
-        String name = "A";
-        System.setIn(new ByteArrayInputStream(name.getBytes()));
-        Scanner scanner = new Scanner(System.in);
-
-        System.setIn(System.in);
-        clientWriter = new ClientWriter(mockClient, mockPrintWriter);
-        clientWriter.register();
-
-        String expected = "{\"messageType\":\"REGISTER\",\"sender\":\"\",\"receivers\":[],\"content\":\"A\"}";
-        verify(mockPrintWriter, times(1))
-                .println(expected);
     }
 
     @Test
@@ -86,24 +63,6 @@ public class ClientWriterTest {
         result = clientWriter.createMessage("/w B A whispers to B");
         Assert.assertEquals(message.getJsonString(), result);
 
-    }
-
-    @Test
-    public void createRegisterMessage_success() {
-        when(mockClient.getClientInfo()).thenReturn(mockClientInfo);
-        when(mockClientInfo.getName()).thenReturn("A");
-
-        clientWriter = new ClientWriter(mockClient, mockPrintWriter);
-
-        Message message = new Message();
-
-        message.setMessage("A",
-                new String[]{},
-                MessageType.REGISTER,
-                "A");
-
-        String result = clientWriter.createRegisterMessage("A");
-        Assert.assertEquals(message.getJsonString(), result);
     }
 
     @Test
