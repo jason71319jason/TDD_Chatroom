@@ -87,21 +87,6 @@ public class ClientReaderTest {
     }
 
     @Test
-    public void responseHandler_RegisterOK() {
-        when(mockClient.getLogger()).thenReturn(mockLogger);
-        when(mockClient.getClientInfo()).thenReturn(mockClientInfo);
-        when(mockClientInfo.getName()).thenReturn("Test man");
-        clientReader = new ClientReader(mockClient, mockBufferedReader);
-
-        Message message = new Message();
-        message.setMessage("SERVER_NAME",new String[]{"Test man"},
-                MessageType.SERVER, "REGISTER_OK");
-        clientReader.responseHandler(message.getJsonString());
-
-        verify(mockClientInfo, times(1)).setName("Test man");
-    }
-
-    @Test
     public void responseHandler_RegisterFail() throws IOException {
         when(mockClient.getLogger()).thenReturn(mockLogger);
         when(mockClient.getClientInfo()).thenReturn(mockClientInfo);

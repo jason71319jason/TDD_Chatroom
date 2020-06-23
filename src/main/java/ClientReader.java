@@ -21,23 +21,34 @@ public class ClientReader extends Thread {
     @Override
     public void run() {
         String response;
-        do {
+        while(true) {
+
+            // Read from console
             try {
                 response = reader.readLine();
-                this.responseHandler(response);
-
             } catch (IOException e) {
+                System.out.println("Server accidentally closed.");
+                this.client.disconnect();
                 e.printStackTrace();
                 break;
             }
-        } while(response != null);
+
+            // check response does not equal NULL
+            if (response == null) {
+                System.out.println("Server accidentally closed.");
+                this.client.disconnect();
+                break;
+            }
+
+            // handle response
+            this.responseHandler(response);
+        }
     }
 
     public void responseHandler(String msg) {
         this.client.getLogger().info(msg);
 
         Message receivedMessage = new Message();
-        Message sentMessage = new Message();
         receivedMessage.setMessageByJson(new JSONObject(msg));
 
         switch(receivedMessage.getMessageType()) {
@@ -48,16 +59,6 @@ public class ClientReader extends Thread {
                     System.out.println(receivedMessage.content);
                 }
                 break;
-            case SERVER:
-                if (receivedMessage.content.equals("REGISTER_OK")) {
-                    // set client username
-                    this.client.getClientInfo().setName(receivedMessage.
-                            getReceivers()[0]);
-                } else if (receivedMessage.content.equals("REGISTER_FAILED")) {
-                    System.err.println("Register failed, the name had been used by others.");
-                }
-                break;
-
             default:
                 this.client.getLogger().warning("Error: Client receive " +
                         receivedMessage.getMessageType() + " type message");
