@@ -1,5 +1,6 @@
 # TDD Chatroom
 [![Build Status](https://travis-ci.org/jason71319jason/TDD_Chatroom.svg?branch=master)](https://travis-ci.org/jason71319jason/TDD_Chatroom)
+[![Coverage Status](https://coveralls.io/repos/github/jason71319jason/TDD_Chatroom/badge.svg?branch=master)](https://coveralls.io/github/jason71319jason/TDD_Chatroom?branch=master)
 
 ## Load Github Project to IntelliJ
 
