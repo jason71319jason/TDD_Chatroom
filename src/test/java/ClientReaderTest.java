@@ -85,27 +85,4 @@ public class ClientReaderTest {
         System.setOut(System.out);
         Assert.assertEquals(result, "A broadcasts\n");
     }
-
-    @Test
-    public void responseHandler_RegisterFail() throws IOException {
-        when(mockClient.getLogger()).thenReturn(mockLogger);
-        when(mockClient.getClientInfo()).thenReturn(mockClientInfo);
-        when(mockClientInfo.getName()).thenReturn("Test man");
-        clientReader = new ClientReader(mockClient, mockBufferedReader);
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(byteArrayOutputStream));
-
-        Message message = new Message();
-        message.setMessage("SERVER_NAME",new String[]{"Test man"},
-                MessageType.SERVER, "REGISTER_FAILED");
-        clientReader.responseHandler(message.getJsonString());
-
-        byteArrayOutputStream.flush();
-        String result = new String(byteArrayOutputStream.toByteArray());
-
-        System.setErr(System.err);
-        verify(mockClientInfo, times(0)).setName("Register failed, the name had been used by others.");
-    }
-
 }

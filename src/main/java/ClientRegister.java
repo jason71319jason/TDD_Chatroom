@@ -46,9 +46,13 @@ public class ClientRegister {
 
                 // receive server response
                 response = socketReader.readLine();
+                if(response == null) {
+                    this.client.disconnect();
+                    break;
+                }
                 registerHandler(response);
 
-            } catch (IOException | NullPointerException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 break;
             }
@@ -66,7 +70,7 @@ public class ClientRegister {
                 this.client.getClientInfo().setName(receivedMessage.
                         getReceivers()[0]);
             } else if (receivedMessage.content.equals("REGISTER_FAILED")) {
-                System.err.println("Register failed, the name had been used by others.");
+                System.out.println("Register failed, the name had been used by others.");
             }
         } else {
             this.client.getLogger().warning("Error: Client receive " +
