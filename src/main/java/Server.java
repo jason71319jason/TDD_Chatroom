@@ -39,7 +39,7 @@ public class Server {
         this.logger.info("Wait for new client");
         this.setStatus(Status.ACTIVE);
         Socket clientSocket;
-        while((clientSocket = serverSocket.accept()) != null) {
+        while((clientSocket = serverSocket.accept()) != null && clientSocket.isConnected()) {
             this.logger.info("New client was accepted");
             this.logger.info(String.format("IP: %s, Port: %d %n",
                     clientSocket.getInetAddress().toString(), clientSocket.getPort()));

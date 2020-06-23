@@ -55,6 +55,7 @@ public class ServerTest {
 
     @Test
     public void start_acceptConnection() throws IOException {
+
         when(mockServerSocket.accept())
                 .thenReturn(mockClientSocket)
                 .thenReturn(mockClientSocket)
@@ -71,6 +72,11 @@ public class ServerTest {
                 .thenReturn(12345)
                 .thenReturn(23456)
                 .thenReturn(34567);
+        when(mockClientSocket.isConnected())
+                .thenReturn(true)
+                .thenReturn(true)
+                .thenReturn(true)
+                .thenReturn(false);
         when(mockServerHandlerFactory.createServerHandler(any(), any()))
                 .thenReturn(mockServerHandler);
         doNothing().when(mockServerHandler).start();

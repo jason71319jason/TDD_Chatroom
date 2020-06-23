@@ -179,7 +179,7 @@ public class ServerHandlerTest {
                 MessageType.REGISTER, "C");
 
         senderC.handleMessage(message.getJsonString());
-        String expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"REGISTER_OK\"}";
+        String expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[\"C\"],\"content\":\"REGISTER_OK\"}";
         verify(mockPrintWriter, times(1))
                 .println(expected);
         expected = "{\"messageType\":\"GLOBAL\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"C joins the chat room\"}";
@@ -206,7 +206,7 @@ public class ServerHandlerTest {
                 MessageType.REGISTER, "A");
 
         senderC.handleMessage(message.getJsonString());
-        String expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"REGISTER_FAILED\"}";
+        String expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[\"A\"],\"content\":\"REGISTER_FAILED\"}";
         verify(mockPrintWriter, times(1))
                 .println(expected);
 
@@ -215,8 +215,8 @@ public class ServerHandlerTest {
                 MessageType.REGISTER, "B");
 
         senderC.handleMessage(message.getJsonString());
-        expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"REGISTER_FAILED\"}";
-        verify(mockPrintWriter, times(2))
+        expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[\"B\"],\"content\":\"REGISTER_FAILED\"}";
+        verify(mockPrintWriter, times(1))
                 .println(expected);
 
         // Register third time: success
@@ -225,7 +225,7 @@ public class ServerHandlerTest {
 
         senderC.handleMessage(message.getJsonString());
 
-        expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"REGISTER_OK\"}";
+        expected = "{\"messageType\":\"SERVER\",\"sender\":\"SERVER\",\"receivers\":[\"C\"],\"content\":\"REGISTER_OK\"}";
         verify(mockPrintWriter, times(1))
                 .println(expected);
         expected = "{\"messageType\":\"GLOBAL\",\"sender\":\"SERVER\",\"receivers\":[],\"content\":\"C joins the chat room\"}";

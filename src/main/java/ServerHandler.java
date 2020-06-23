@@ -26,19 +26,42 @@ public class ServerHandler extends Thread {
     @Override
     public void run()  {
         String clientMsg;
+        while(true) {
 
-        do {
+            // read from socket
             try {
                 clientMsg = reader.readLine();
             } catch (IOException e) {
+                this.close();
                 e.printStackTrace();
                 break;
             }
 
-            handleMessage(clientMsg);
-            System.out.println(clientMsg);
+            // check whether socket alive
+            if(clientMsg == null) {
+                this.close();
+            }
 
-        } while(!clientMsg.equals("/exit"));
+            handleMessage(clientMsg);
+        }
+    }
+
+    public void close() {
+
+        this.server.getServerHandles().remove(this);
+        String Response =  this.clientName + " leave the chat room";
+        Message sentMessage = new Message();
+        sentMessage.setMessage(this.clientName,
+                new String[]{},
+                MessageType.GLOBAL,
+                Response);
+        this.broadcastMessage(sentMessage.getJsonString());
+
+        try {
+            this.socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void handleMessage(String msg) {
@@ -71,13 +94,7 @@ public class ServerHandler extends Thread {
                 break;
 
             case QUIT:
-                this.server.getServerHandles().remove(this);
-                Response =  this.clientName + " leave the chat room";
-                sentMessage.setMessage(this.clientName,
-                        receivedMessage.receivers,
-                        MessageType.GLOBAL,
-                        Response);
-                this.broadcastMessage(sentMessage.getJsonString());
+                this.close();
                 break;
 
             case REGISTER:
@@ -93,10 +110,11 @@ public class ServerHandler extends Thread {
                 }
 
                 sentMessage.setMessage(ServerHandler.SERVER_NAME,
-                        receivedMessage.receivers,
+                        new String[]{receivedMessage.content},
                         MessageType.SERVER,
                         Response);
                 this.sendMessage(sentMessage.getJsonString());
+
                 // broadcast to other
                 if(isPass) {
                     Response = this.clientName + " joins the chat room";

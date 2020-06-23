@@ -6,9 +6,11 @@ import java.net.Socket;
 
 public class ServerHandlerFactory {
     public ServerHandler createServerHandler(Socket socket, Server server) throws IOException {
-        ServerHandler serverHandler = new ServerHandler(socket, server,
-                new BufferedReader(new InputStreamReader(socket.getInputStream())),
-                new PrintWriter(socket.getOutputStream(), true));
-        return serverHandler;
+        return new ServerHandler(socket, server,
+                new BufferedReader(
+                        new InputStreamReader(
+                                socket.getInputStream())),
+                new PrintWriter(
+                        socket.getOutputStream(), true));
     }
 }
