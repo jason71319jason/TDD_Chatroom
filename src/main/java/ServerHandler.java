@@ -40,6 +40,7 @@ public class ServerHandler extends Thread {
             // check whether socket alive
             if(clientMsg == null) {
                 this.close();
+                break;
             }
 
             handleMessage(clientMsg);

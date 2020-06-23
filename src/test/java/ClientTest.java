@@ -6,12 +6,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.IOException;
 import java.net.Socket;
 
-import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 public class ClientTest {
@@ -49,7 +46,7 @@ public class ClientTest {
 
     // Connect success
     @Test
-    public void connect_success() throws IOException {
+    public void connect_success() throws Exception {
         when(mockClientHandlerFactory.createClientReader(any()))
                 .thenReturn(mockClientReader);
         when(mockClientHandlerFactory.createClientWriter(any()))
@@ -66,7 +63,7 @@ public class ClientTest {
 
     // Client leave server success
     @Test
-    public void disconnect_correct() throws  IOException {
+    public void disconnect_correct() throws  Exception {
         when(mockClientHandlerFactory.createClientReader(any()))
                 .thenReturn(mockClientReader);
         when(mockClientHandlerFactory.createClientWriter(any()))
