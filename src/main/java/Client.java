@@ -4,43 +4,51 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Socket;
+import java.net.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Client extends Thread {
 
-    public static Logger logger;
-
-    public static ClientInfo clientInfo;
+    public static final int SERVER_DEFAULT_PORT = 54321;
+    private ClientInfo clientInfo;
+    private Logger logger;
+    private Status status;
     private Socket socket;
-    private String hostname;
-    private int port;
-    private ClientWriter clientWrite;
-    private ClientReader clientreader;
-    private static Status status;
+    private ClientHandlerFactory clientHandlerFactory;
+
     /**
      *
      */
-    public Client(ClientInfo info) throws IOException {
-        status = Status.INACTIVE;
-        clientInfo = info;
+    public Client(Socket socket, ClientInfo clientInfo,
+                  ClientHandlerFactory clientHandlerFactory) {
+        this.socket = socket;
+        this.clientInfo = clientInfo;
+        this.clientHandlerFactory = clientHandlerFactory;
+
+        this.initLogger();
+        this.setStatus(Status.INACTIVE);
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     /**
      *
      */
-    public void connect(ServerInfo serverInfo) {
+    public void connect() {
+        this.status = Status.ACTIVE;
         try {
-            socket = new Socket(serverInfo.getHostname(), serverInfo.getPort());
-            status = Status.ACTIVE;
-            new ClientWriter(socket, clientInfo, this).start();
-            new ClientReader(socket, clientInfo, this).start();
-
-        } catch (IOException e) {
-            status = Status.INACTIVE;
+            ClientRegister register = clientHandlerFactory.createClientRegister(this);
+            register.register();
+            this.clientHandlerFactory.createClientWriter(this).start();
+            this.clientHandlerFactory.createClientReader(this).start();
+        } catch (Exception e) {
+            this.disconnect();
             e.printStackTrace();
         }
+
     }
 
     /**
@@ -59,50 +67,43 @@ public class Client extends Thread {
         return status;
     }
 
-    public void run(ServerInfo serverInfo) {
-        this.connect(serverInfo);
+    public ClientInfo getClientInfo() {
+        return clientInfo;
     }
 
+    public void setClientInfo(ClientInfo clientInfo) {
+        this.clientInfo = clientInfo;
+    }
 
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
+    public Logger getLogger() {
+        return logger;
+    }
     /**
-     *
+     * initialize server logger
      */
-//    public void register(Callback callback) {
-//        System.out.print("Type your name: ");
-//        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-//        try {
-//
-//            socket = new Socket(hostname, port);
-//            logger.info("Successful connection");
-//            System.out.println("Loading ...");
-//
-//            new ClientWriter(socket, clientInfo).start();
-//            new ClientReader(socket, clientInfo).start();
-//
-            // TODO: Input check
-//            String name = reader.readLine();
-//            BufferedOutputStream out = new BufferedOutputStream(socket
-//                    .getOutputStream());
-//            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//            out.write(name.getBytes());
-//            clientInfo = new ClientInfo();
-//            return ;
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    public static void main(String argv[]) throws IOException {
-        status = Status.INACTIVE;
-        clientInfo = new ClientInfo();
-        ServerInfo serverInfo = new ServerInfo();
-        serverInfo.setHostname("localhost");
-        serverInfo.setPort(12345);
-        Client client;
-        logger = Logger.getLogger("Client");
+    private void initLogger() {
+        logger = Logger.getLogger("Chat Room Client");
         logger.setLevel(Level.ALL);
-        client = new Client(clientInfo);
-        client.connect(serverInfo);
+    }
+
+    public static void main(String[] args) {
+        try {
+            Socket socket = new Socket("localhost", Client.SERVER_DEFAULT_PORT);
+            ClientInfo clientInfo = new ClientInfo();
+            ClientHandlerFactory clientHandlerFactory = new ClientHandlerFactory();
+            Client client = new Client(socket, clientInfo, clientHandlerFactory);
+            client.connect();
+        } catch  (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

@@ -9,6 +9,9 @@
     <version>0.1</version>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <cobertura.version>2.7</cobertura.version>
+        <coveralls.version>3.1.0</coveralls.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
@@ -39,4 +42,67 @@
 
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>3.5.2</version>
+                <configuration>
+                    <sourceEncoding>UTF-8</sourceEncoding>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.3.0</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <format>xml</format>
+                    <maxmem>256m</maxmem>
+                    <!-- aggregated reports for multi-module projects -->
+                    <aggregate>true</aggregate>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>travis</id>
+            <activation>
+                <property>
+                    <name>env.TRAVIS</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>cobertura-maven-plugin</artifactId>
+                        <version>${cobertura.version}</version>
+                        <configuration>
+                            <formats>
+                                <format>xml</format>
+                            </formats>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eluder.coveralls</groupId>
+                        <artifactId>coveralls-maven-plugin</artifactId>
+                        <version>4.3.0</version>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
