@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 public class ClientInfoTest {
 
     @Test
-    public void ClientInfo_null() {
+    public void clientInfo_null() {
         ClientInfo clientInfo = new ClientInfo();
         clientInfo.setName(null);
         Assert.assertNull(clientInfo.getName());
