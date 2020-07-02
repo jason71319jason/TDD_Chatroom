@@ -14,14 +14,15 @@ public class ClientWriter extends Thread {
 
     @Override
     public void run() {
-        String msg = "";
+        String msg;
         // Communication
-        while(this.client.getStatus() == Status.ACTIVE &&
-                !msg.equals("/exit")) {
+        while(this.client.getStatus() == Status.ACTIVE) {
             try {
                 // prompt
                 System.out.print("[" + this.client.getClientInfo().getName() + "]: ");
                 msg = reader.readLine();
+                if(msg.equals("/exit"))
+                    break;
                 writer.println(createMessage(msg));
             } catch (IOException e) {
                 e.printStackTrace();

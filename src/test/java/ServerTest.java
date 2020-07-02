@@ -87,7 +87,6 @@ public class ServerTest {
         server.start();
         verify(mockServerHandlerFactory, times(3))
                 .createServerHandler(any(), any());
-        Assert.assertEquals(3, server.getServerHandles().size());
     }
 
     @Test (expected = IOException.class)

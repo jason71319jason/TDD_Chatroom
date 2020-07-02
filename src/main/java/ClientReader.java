@@ -27,7 +27,7 @@ public class ClientReader extends Thread {
             try {
                 response = reader.readLine();
             } catch (IOException e) {
-                System.out.println("Server accidentally closed.");
+                System.out.println("Server accidentally closed. [IOException]");
                 this.client.disconnect();
                 e.printStackTrace();
                 break;
@@ -35,7 +35,7 @@ public class ClientReader extends Thread {
 
             // check response does not equal NULL
             if (response == null) {
-                System.out.println("Server accidentally closed.");
+                System.out.println("Server accidentally closed. [NULL Response]");
                 this.client.disconnect();
                 break;
             }

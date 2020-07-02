@@ -32,6 +32,7 @@ public class ServerHandler extends Thread {
             try {
                 clientMsg = reader.readLine();
             } catch (IOException e) {
+                System.out.println("close [IOException]");
                 this.close();
                 e.printStackTrace();
                 break;
@@ -39,11 +40,14 @@ public class ServerHandler extends Thread {
 
             // check whether socket alive
             if(clientMsg == null) {
+                System.out.println("close [clientMsg == null]");
                 this.close();
                 break;
             }
 
-            handleMessage(clientMsg);
+            int result = handleMessage(clientMsg);
+            if(result == -1)
+                break;
         }
     }
 
@@ -65,7 +69,7 @@ public class ServerHandler extends Thread {
         }
     }
 
-    public void handleMessage(String msg) {
+    public int handleMessage(String msg) {
 
         this.server.getLogger().info(msg);
 
@@ -95,6 +99,7 @@ public class ServerHandler extends Thread {
                 break;
 
             case QUIT:
+                System.out.println("close [MessageType.QUIT]");
                 this.close();
                 break;
 
@@ -124,6 +129,7 @@ public class ServerHandler extends Thread {
                             MessageType.GLOBAL,
                             Response);
                     this.broadcastMessage(sentMessage.getJsonString());
+                    this.server.getServerHandles().add(this);
                 }
                 break;
 
@@ -133,6 +139,10 @@ public class ServerHandler extends Thread {
                         receivedMessage.getMessageType() + " type message");
                 break;
         }
+
+        if(receivedMessage.getMessageType() == MessageType.QUIT)
+            return -1;
+        return 0;
 
     }
 

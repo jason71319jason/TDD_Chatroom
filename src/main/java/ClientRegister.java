@@ -74,7 +74,7 @@ public class ClientRegister {
             }
         } else {
             this.client.getLogger().warning("Error: Client receive " +
-                    receivedMessage.getMessageType() + " type message");
+                    receivedMessage.getMessageType() + " type message.\nContent: " + receivedMessage.content);
         }
     }
 
