@@ -101,7 +101,6 @@ public class Server {
      */
     private void runServerHandler(Socket socket) throws IOException {
         ServerHandler handler = serverHandlerFactory.createServerHandler(socket, this);
-        this.serverHandlers.add(handler);
         handler.start();
     }
 
